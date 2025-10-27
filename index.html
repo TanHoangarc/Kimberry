@@ -22,6 +22,7 @@
       background-position: center;
       position: relative;
     }
+
     header::after {
       content: "";
       position: absolute;
@@ -29,6 +30,7 @@
       background-color: rgba(0,0,0,0.5);
       z-index: 0;
     }
+
     header h1 {
       position: relative;
       z-index: 1;
@@ -45,6 +47,7 @@
       overflow: hidden;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+
     .search-bar input {
       border: none;
       padding: 12px 20px;
@@ -52,6 +55,7 @@
       outline: none;
       font-size: 16px;
     }
+
     .search-bar button {
       background: #5c9ead;
       color: white;
@@ -60,6 +64,7 @@
       cursor: pointer;
       transition: 0.3s;
     }
+
     .search-bar button:hover {
       background: #4a8c99;
     }
@@ -72,6 +77,7 @@
       padding: 10px 0;
       box-shadow: 0 2px 3px rgba(0,0,0,0.05);
     }
+
     nav button {
       background: #a8d0a2;
       border: none;
@@ -82,6 +88,7 @@
       cursor: pointer;
       transition: 0.3s;
     }
+
     nav button:hover {
       background: #5c9ead;
       color: white;
@@ -102,10 +109,29 @@
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
+
     h2 {
       color: #184d47;
       border-bottom: 2px solid #a8d0a2;
       padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      background: #5c9ead;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #4a8c99;
     }
 
     .doc-grid {
@@ -114,6 +140,7 @@
       gap: 15px;
       margin-top: 20px;
     }
+
     .doc-item {
       background: #a8d0a2;
       color: #184d47;
@@ -124,7 +151,30 @@
       cursor: pointer;
       transition: 0.3s;
     }
+
     .doc-item:hover {
+      background: #5c9ead;
+      color: white;
+    }
+
+    .form-btns {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .form-btns button {
+      background: #a8d0a2;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .form-btns button:hover {
       background: #5c9ead;
       color: white;
     }
@@ -132,24 +182,46 @@
     iframe {
       width: 100%;
       height: 600px;
-      border: none;
       border-radius: 10px;
-      margin-top: 10px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
     }
 
-    .btn-back, .btn-download, .btn-hub {
-      display: inline-block;
+    .download-btn {
+      display: block;
+      margin: 20px auto 0;
       background: #5c9ead;
       color: white;
       border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      margin: 10px 5px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
       cursor: pointer;
       transition: 0.3s;
     }
-    .btn-back:hover, .btn-download:hover, .btn-hub:hover {
+
+    .download-btn:hover {
       background: #4a8c99;
+    }
+
+    .calendar {
+      text-align: center;
+    }
+
+    .calendar table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .calendar th {
+      background: #5c9ead;
+      color: white;
+      padding: 8px;
+    }
+
+    .calendar td {
+      padding: 8px;
+      border: 1px solid #ddd;
     }
 
     footer {
@@ -160,12 +232,16 @@
     }
 
     @media (max-width: 768px) {
-      main { grid-template-columns: 1fr; }
+      main {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <header><h1>Welcome, Sabina!</h1></header>
+  <header>
+    <h1>Welcome, Sabina!</h1>
+  </header>
 
   <div class="search-bar">
     <input type="text" placeholder="Search Forms & Templates..." />
@@ -173,78 +249,101 @@
   </div>
 
   <nav>
-    <button onclick="showSection('docs')">Documents</button>
-    <button onclick="showTemplates()">Templates</button>
-    <button onclick="showRequestForms()">Request Forms</button>
+    <button>Time Sheets</button>
+    <button>Time Off</button>
+    <button>Expenses</button>
+    <button>Holidays</button>
+    <button>Benefits</button>
+    <button>Directory</button>
+    <button>IT Helpdesk</button>
+    <button>Products</button>
   </nav>
 
   <main>
-    <section id="section-docs">
-      <h2>Documents</h2>
-      <div class="doc-grid">
+    <section id="doc-section">
+      <h2 id="doc-title">Documents</h2>
+
+      <div class="doc-grid" id="doc-grid">
         <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item" onclick="showTemplates()">Templates</div>
         <div class="doc-item">Applications</div>
+        <div class="doc-item" onclick="showTemplate()">Templates</div>
         <div class="doc-item">Projects</div>
         <div class="doc-item">Employee Handbook</div>
         <div class="doc-item">Policies & Procedures</div>
         <div class="doc-item">Marketing Collateral</div>
         <div class="doc-item">SOPs</div>
       </div>
+
+      <!-- Templates view -->
+      <div id="template-view" style="display:none;">
+        <h2>
+          Templates 
+          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+        </h2>
+        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview" allow="autoplay"></iframe>
+        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
+      </div>
+
+      <!-- Request Forms view -->
+      <div id="request-view" style="display:none;">
+        <h2>
+          Request Forms 
+          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+        </h2>
+        <div class="form-btns">
+          <button onclick="alert('HCM form clicked!')">HCM</button>
+          <button onclick="alert('HPH form clicked!')">HPH</button>
+        </div>
+      </div>
     </section>
 
-    <section id="section-dynamic" style="display:none;"></section>
+    <section class="calendar">
+      <h2>Calendar</h2>
+      <table>
+        <tr>
+          <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+        </tr>
+        <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+        <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+        <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td></tr>
+      </table>
+      <p><b>Recurring Event:</b> Every Wednesday</p>
+    </section>
   </main>
 
-  <footer>© 2025 The Hub. All rights reserved.</footer>
+  <footer>
+    © 2025 The Hub. All rights reserved.
+  </footer>
 
   <script>
-    const docSection = document.getElementById("section-docs");
-    const dynamic = document.getElementById("section-dynamic");
-
-    function showSection(name){
-      docSection.style.display = "block";
-      dynamic.style.display = "none";
+    function showTemplate() {
+      document.getElementById("doc-title").style.display = "none";
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("template-view").style.display = "block";
+      document.getElementById("request-view").style.display = "none";
     }
 
-    function showTemplates(){
-      docSection.style.display = "none";
-      dynamic.style.display = "block";
-      dynamic.innerHTML = `
-        <h2>Templates</h2>
-        <button class="btn-back" onclick="showSection('docs')">← Quay lại</button>
-        <iframe src="https://docs.google.com/document/d/e/2PACX-1vTs9TXS8Txj6eJ-WxpuZ7gNeI8m4ehHRX8UedmxEGZhVxN-fh/pub?embedded=true"></iframe>
-        <div style="text-align:center;">
-          <a class="btn-download" href="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=pdf" target="_blank">⬇️ Tải xuống PDF</a>
-        </div>`;
+    function showRequestForms() {
+      document.getElementById("doc-title").style.display = "none";
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("request-view").style.display = "block";
+      document.getElementById("template-view").style.display = "none";
     }
 
-    function showRequestForms(){
-      docSection.style.display = "none";
-      dynamic.style.display = "block";
-      dynamic.innerHTML = `
-        <h2>Request Forms</h2>
-        <button class="btn-back" onclick="showSection('docs')">← Quay lại</button>
-        <div style="text-align:center; margin-top:20px;">
-          <button class="btn-hub" onclick="showHCM()">HCM</button>
-          <button class="btn-hub" onclick="showHPH()">HPH</button>
-        </div>`;
+    function backToDocuments() {
+      document.getElementById("doc-title").style.display = "block";
+      document.getElementById("doc-grid").style.display = "grid";
+      document.getElementById("template-view").style.display = "none";
+      document.getElementById("request-view").style.display = "none";
     }
 
-    function showHCM(){
-      dynamic.innerHTML = `
-        <h2>Request Forms - HCM</h2>
-        <button class="btn-back" onclick="showRequestForms()">← Quay lại</button>
-        <img src="8d69175a-c24e-423a-b7e8-08f088f2a784.png" style="width:100%;margin-top:15px;border-radius:10px;">
-      `;
-    }
-
-    function showHPH(){
-      dynamic.innerHTML = `
-        <h2>Request Forms - HPH</h2>
-        <button class="btn-back" onclick="showRequestForms()">← Quay lại</button>
-        <img src="7a65fdc4-c745-47d2-b09b-4760163cc11f.png" style="width:100%;margin-top:15px;border-radius:10px;">
-      `;
+    function downloadTemplate() {
+      window.open(
+        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
+        "_blank"
+      );
     }
   </script>
 </body>
