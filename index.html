@@ -11,341 +11,6 @@
       background-color: #f4f4f4;
       color: #333;
     }
-    header {
-      background-color: #184d47;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=60");
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
-    header::after {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 0;
-    }
-    header h1 {
-      position: relative;
-      z-index: 1;
-      font-size: 36px;
-      color: #fff;
-    }
-    nav {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      background: #fff;
-      padding: 10px 0;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.05);
-    }
-    nav button {
-      background: #a8d0a2;
-      border: none;
-      margin: 8px;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    nav button:hover {
-      background: #5c9ead;
-      color: white;
-    }
-    main {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-      padding: 30px;
-      max-width: 1200px;
-      margin: auto;
-    }
-    section {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    h2 {
-      color: #184d47;
-      border-bottom: 2px solid #a8d0a2;
-      padding-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .back-btn {
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .back-btn:hover {
-      background: #4a8c99;
-    }
-    .doc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .doc-item {
-      background: #a8d0a2;
-      color: #184d47;
-      border-radius: 10px;
-      text-align: center;
-      padding: 20px 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .doc-item:hover {
-      background: #5c9ead;
-      color: white;
-    }
-    .form-btns {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .form-btns button {
-      background: #a8d0a2;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .form-btns button:hover {
-      background: #5c9ead;
-      color: white;
-    }
-    iframe {
-      width: 100%;
-      height: 600px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background: #5c9ead;
-      color: white;
-    }
-    .download-btn {
-      display: block;
-      margin: 20px auto 0;
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .download-btn:hover {
-      background: #4a8c99;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Welcome, Sabina!</h1>
-  </header>
-
-  <nav>
-    <button>Time Sheets</button>
-    <button>Time Off</button>
-    <button>Expenses</button>
-    <button>Holidays</button>
-    <button>Benefits</button>
-    <button>Directory</button>
-    <button>Products</button>
-  </nav>
-
-  <main>
-    <section id="doc-section">
-      <h2 id="doc-title">Documents</h2>
-
-      <div class="doc-grid" id="doc-grid">
-        <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item" onclick="showTemplate()">Templates</div>
-      </div>
-
-      <!-- Templates -->
-      <div id="template-view" style="display:none;">
-        <h2>
-          Templates 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
-        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
-      </div>
-
-      <!-- Request Forms -->
-      <div id="request-view" style="display:none;">
-        <h2>
-          Request Forms
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <div class="form-btns">
-          <button onclick="showTable('HCM')">HCM</button>
-          <button onclick="showTable('HPH')">HPH</button>
-        </div>
-
-        <div id="form-table" style="display:none;">
-          <h3 id="table-title"></h3>
-          <table id="data-table"></table>
-          <button class="back-btn" style="margin-top:15px;" onclick="hideTable()">⬅ Quay lại Request Forms</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer style="text-align:center;padding:20px;color:#777;">
-    © 2025 The Hub. All rights reserved.
-  </footer>
-
-  <script>
-    function showTemplate() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "block";
-      document.getElementById("request-view").style.display = "none";
-    }
-
-    function showRequestForms() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("request-view").style.display = "block";
-      document.getElementById("template-view").style.display = "none";
-    }
-
-    function backToDocuments() {
-      document.getElementById("doc-title").style.display = "block";
-      document.getElementById("doc-grid").style.display = "grid";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-    }
-
-    function downloadTemplate() {
-      window.open("https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx", "_blank");
-    }
-
-    // Hiển thị bảng khi chọn HCM / HPH
-    function showTable(type) {
-      const dataHCM = [
-        ["CIC", "CIC", "✓", "Container", "VND1300000", "VND2600000", "VND2600000"],
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"]
-      ];
-
-      const dataHPH = [
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"],
-        ["CIC", "CIC", "✓", "Container", "VND2500000", "VND5000000", "VND5000000"]
-      ];
-
-      const data = type === "HCM" ? dataHCM : dataHPH;
-
-      const table = document.getElementById("data-table");
-      table.innerHTML = `
-        <tr>
-          <th>Charge Name</th>
-          <th>Charge Name En</th>
-          <th>Is Must</th>
-          <th>PER CNTR / PER BILL</th>
-          <th>20GP</th>
-          <th>40GP</th>
-          <th>40HQ</th>
-        </tr>
-      `;
-
-      data.forEach(row => {
-        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
-      });
-
-      document.getElementById("table-title").innerText = type;
-      document.getElementById("form-table").style.display = "block";
-    }
-
-    function hideTable() {
-      document.getElementById("form-table").style.display = "none";
-    }
-  </script>
-</body>
-</html>
-🔹 Giải thích nhanh:
-
-Khi bấm “Request Forms” → hiển thị hai nút HCM / HPH.
-
-Khi chọn 1 nút → xuất hiện bảng dữ liệu giả lập tương ứng.
-
-Có nút ⬅ Quay lại Request Forms ngay dưới bảng.
-
-Bạn chỉ cần thay giá trị trong dataHCM và dataHPH bằng dữ liệu thật (copy từ file Excel hoặc JSON).
-
-Bạn có muốn mình thêm luôn chức năng xuất bảng này ra Excel (hoặc PDF) khi nhấn nút “Tải xuống” không?
-
-
-
-
-
-
-
-Bạn đã nói:
-viết thêm không bỏ phần nào cả
-
-
-
-ChatGPT đã nói:
-Rất hay 👌
-Dưới đây là phiên bản hoàn chỉnh nhất, đã:
-✅ Giữ nguyên toàn bộ code gốc (không bỏ phần nào).
-✅ Thêm đầy đủ phần Request Forms với 2 nút HCM / HPH và bảng dữ liệu.
-✅ Giữ phần Templates và Download Template hoạt động bình thường.
-✅ Có nút quay lại ở cả Templates và Request Forms.
-
-✅ Code đầy đủ:
-html
-Sao chép mã
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Hub - Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-    }
 
     header {
       background-color: #184d47;
@@ -588,6 +253,44 @@ Sao chép mã
         grid-template-columns: 1fr;
       }
     }
+
+    /* Popup */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 600px;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .popup-content button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #5c9ead;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+
+    .popup-content button:hover {
+      background: #4a8c99;
+    }
   </style>
 </head>
 <body>
@@ -617,10 +320,10 @@ Sao chép mã
 
       <div class="doc-grid" id="doc-grid">
         <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item">Applications</div>
+        <div class="doc-item" onclick="showPopup('applications')">Applications</div>
         <div class="doc-item" onclick="showTemplate()">Templates</div>
-        <div class="doc-item">Projects</div>
-        <div class="doc-item">Employee Handbook</div>
+        <div class="doc-item" onclick="showPopup('projects')">Projects</div>
+        <div class="doc-item" onclick="showPopup('handbook')">Employee Handbook</div>
         <div class="doc-item">Policies & Procedures</div>
         <div class="doc-item">Marketing Collateral</div>
         <div class="doc-item">SOPs</div>
@@ -675,438 +378,14 @@ Sao chép mã
     © 2025 The Hub. All rights reserved.
   </footer>
 
-  <script>
-    function showTemplate() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "block";
-      document.getElementById("request-view").style.display = "none";
-    }
-
-    function backToDocuments() {
-      document.getElementById("doc-title").style.display = "block";
-      document.getElementById("doc-grid").style.display = "grid";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-    }
-
-    function downloadTemplate() {
-      window.open(
-        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
-        "_blank"
-      );
-    }
-
-    function showRequestForms() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "block";
-    }
-
-    function showTable(type) {
-      const dataHCM = [
-        ["CIC", "CIC", "✓", "Container", "VND1300000", "VND2600000", "VND2600000"],
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"]
-      ];
-
-      const dataHPH = [
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"],
-        ["CIC", "CIC", "✓", "Container", "VND2500000", "VND5000000", "VND5000000"]
-      ];
-
-      const data = type === "HCM" ? dataHCM : dataHPH;
-
-      const table = document.getElementById("data-table");
-      table.innerHTML = `
-        <tr>
-          <th>Charge Name</th>
-          <th>Charge Name En</th>
-          <th>Is Must</th>
-          <th>PER CNTR / PER BILL</th>
-          <th>20GP</th>
-          <th>40GP</th>
-          <th>40HQ</th>
-        </tr>
-      `;
-
-      data.forEach(row => {
-        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
-      });
-
-      document.getElementById("table-title").innerText = type;
-      document.getElementById("form-table").style.display = "block";
-    }
-
-    function hideTable() {
-      document.getElementById("form-table").style.display = "none";
-    }
-  </script>
-</body>
-</html>
-🟢 Tóm tắt:
-
-“Request Forms” → hiển thị 2 nút HCM & HPH.
-
-Khi click → hiện bảng dữ liệu tương ứng.
-
-Có nút “⬅ Quay lại Request Forms” để trở về chọn.
-
-Templates vẫn hoạt động như trước.
-
-Bạn có muốn mình thêm nút “⬇ Tải xuống bảng (Excel)” bên dưới bảng “HCM / HPH” nữa không?
-Nếu có, mình sẽ thêm tính năng xuất bảng ra file .xlsx trực tiếp trong trình duyệt (không cần backend).
-
-
-
-
-
-
-
-Bạn đã nói:
-Nút Applications sẽ hiển thị thông tin:
-"1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all  email gửi thông báo hàng đến  của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách. 
-
-2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM"
-Nút Projects sẽ hiển thị thông tin:
-"Mức cược container: 
-Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.
-Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.
-Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN "
-Nút Employee Handbook sẽ hiển thị thông tin:
-"Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và  không thanh toán theo tài khoản trên hóa đơn. 
-
-Company Name: CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG
-Account NO.: 345673979999
-Bank: MB BANK CHI NHÁNH HCM" 
-
-
-
-ChatGPT đã nói:
-Rất hay 👍 — dưới đây là phiên bản đầy đủ và hoàn chỉnh của code bạn yêu cầu (đã giữ nguyên toàn bộ phần cũ + thêm chức năng hiển thị nội dung khi bấm vào Applications, Projects, và Employee Handbook):
-
-html
-Sao chép mã
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Hub - Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-
-    header {
-      background-color: #184d47;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=60");
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
-
-    header::after {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 0;
-    }
-
-    header h1 {
-      position: relative;
-      z-index: 1;
-      font-size: 36px;
-      color: #fff;
-    }
-
-    .search-bar {
-      margin: 20px auto;
-      max-width: 600px;
-      display: flex;
-      background: white;
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .search-bar input {
-      border: none;
-      padding: 12px 20px;
-      width: 100%;
-      outline: none;
-      font-size: 16px;
-    }
-
-    .search-bar button {
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 0 20px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .search-bar button:hover {
-      background: #4a8c99;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      background: #fff;
-      padding: 10px 0;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.05);
-    }
-
-    nav button {
-      background: #a8d0a2;
-      border: none;
-      margin: 8px;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    nav button:hover {
-      background: #5c9ead;
-      color: white;
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-      padding: 30px;
-      max-width: 1200px;
-      margin: auto;
-    }
-
-    section {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    h2 {
-      color: #184d47;
-      border-bottom: 2px solid #a8d0a2;
-      padding-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .back-btn {
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .back-btn:hover {
-      background: #4a8c99;
-    }
-
-    .doc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .doc-item {
-      background: #a8d0a2;
-      color: #184d47;
-      border-radius: 10px;
-      text-align: center;
-      padding: 20px 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .doc-item:hover {
-      background: #5c9ead;
-      color: white;
-    }
-
-    iframe {
-      width: 100%;
-      height: 600px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-
-    .download-btn {
-      display: block;
-      margin: 20px auto 0;
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .download-btn:hover {
-      background: #4a8c99;
-    }
-
-    .info-box {
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 15px;
-      line-height: 1.6;
-      color: #333;
-      white-space: pre-line;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-      color: #777;
-    }
-
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Welcome, Sabina!</h1>
-  </header>
-
-  <div class="search-bar">
-    <input type="text" placeholder="Search Forms & Templates..." />
-    <button>🔍</button>
+  <!-- Popup hiển thị nội dung -->
+  <div class="popup" id="popup">
+    <div class="popup-content" id="popup-content">
+      <button onclick="closePopup()">✖</button>
+      <p id="popup-text"></p>
+    </div>
   </div>
 
-  <nav>
-    <button>Time Sheets</button>
-    <button>Time Off</button>
-    <button>Expenses</button>
-    <button>Holidays</button>
-    <button>Benefits</button>
-    <button>Directory</button>
-    <button>IT Helpdesk</button>
-    <button>Products</button>
-  </nav>
-
-  <main>
-    <section id="doc-section">
-      <h2 id="doc-title">Documents</h2>
-      <div class="doc-grid" id="doc-grid">
-        <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item" onclick="showApplications()">Applications</div>
-        <div class="doc-item" onclick="showTemplate()">Templates</div>
-        <div class="doc-item" onclick="showProjects()">Projects</div>
-        <div class="doc-item" onclick="showEmployee()">Employee Handbook</div>
-        <div class="doc-item">Policies & Procedures</div>
-        <div class="doc-item">Marketing Collateral</div>
-        <div class="doc-item">SOPs</div>
-      </div>
-
-      <!-- Templates -->
-      <div id="template-view" style="display:none;">
-        <h2>
-          Templates 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview" allow="autoplay"></iframe>
-        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
-      </div>
-
-      <!-- Request Forms -->
-      <div id="request-view" style="display:none;">
-        <h2>
-          Request Forms 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <div style="text-align:center; margin-top:20px;">
-          <button class="download-btn" style="background:#a8d0a2;" onclick="alert('HCM selected')">HCM</button>
-          <button class="download-btn" style="background:#a8d0a2;" onclick="alert('HPH selected')">HPH</button>
-        </div>
-      </div>
-
-      <!-- Applications -->
-      <div id="applications-view" style="display:none;">
-        <h2>
-          Applications 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <div class="info-box">
-1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.
-
-2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.
-        </div>
-      </div>
-
-      <!-- Projects -->
-      <div id="projects-view" style="display:none;">
-        <h2>
-          Projects 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <div class="info-box">
-Mức cược container:
-Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.
-Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.
-Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.
-        </div>
-      </div>
-
-      <!-- Employee Handbook -->
-      <div id="employee-view" style="display:none;">
-        <h2>
-          Employee Handbook 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <div class="info-box">
-Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.
-
-Company Name: CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG
-Account NO.: 345673979999
-Bank: MB BANK CHI NHÁNH HCM
-        </div>
-      </div>
-
-    </section>
-  </main>
-
-  <footer>
-    © 2025 The Hub. All rights reserved.
-  </footer>
-
   <script>
     function showTemplate() {
       document.getElementById("doc-title").style.display = "none";
@@ -1178,6 +457,34 @@ Bank: MB BANK CHI NHÁNH HCM
 
     function hideTable() {
       document.getElementById("form-table").style.display = "none";
+    }
+
+    // Popup content
+    function showPopup(type) {
+      const popup = document.getElementById("popup");
+      const text = document.getElementById("popup-text");
+
+      const contents = {
+        applications: `1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.<br><br>
+        2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.`,
+        
+        projects: `Mức cược container:<br>
+        Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.<br>
+        Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.<br>
+        Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.`,
+        
+        handbook: `Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.<br><br>
+        <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
+        <b>Account NO.:</b> 345673979999<br>
+        <b>Bank:</b> MB BANK CHI NHÁNH HCM`
+      };
+
+      text.innerHTML = contents[type];
+      popup.style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
     }
   </script>
 </body>
