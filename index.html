@@ -11,7 +11,6 @@
       background-color: #f4f4f4;
       color: #333;
     }
-
     header {
       background-color: #184d47;
       color: white;
@@ -22,7 +21,6 @@
       background-position: center;
       position: relative;
     }
-
     header::after {
       content: "";
       position: absolute;
@@ -30,45 +28,12 @@
       background-color: rgba(0,0,0,0.5);
       z-index: 0;
     }
-
     header h1 {
       position: relative;
       z-index: 1;
       font-size: 36px;
       color: #fff;
     }
-
-    .search-bar {
-      margin: 20px auto;
-      max-width: 600px;
-      display: flex;
-      background: white;
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .search-bar input {
-      border: none;
-      padding: 12px 20px;
-      width: 100%;
-      outline: none;
-      font-size: 16px;
-    }
-
-    .search-bar button {
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 0 20px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .search-bar button:hover {
-      background: #4a8c99;
-    }
-
     nav {
       display: flex;
       justify-content: center;
@@ -77,7 +42,6 @@
       padding: 10px 0;
       box-shadow: 0 2px 3px rgba(0,0,0,0.05);
     }
-
     nav button {
       background: #a8d0a2;
       border: none;
@@ -88,12 +52,10 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     nav button:hover {
       background: #5c9ead;
       color: white;
     }
-
     main {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -102,14 +64,12 @@
       max-width: 1200px;
       margin: auto;
     }
-
     section {
       background: white;
       border-radius: 15px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-
     h2 {
       color: #184d47;
       border-bottom: 2px solid #a8d0a2;
@@ -118,7 +78,6 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .back-btn {
       background: #5c9ead;
       color: white;
@@ -129,18 +88,15 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     .back-btn:hover {
       background: #4a8c99;
     }
-
     .doc-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 15px;
       margin-top: 20px;
     }
-
     .doc-item {
       background: #a8d0a2;
       color: #184d47;
@@ -151,19 +107,16 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     .doc-item:hover {
       background: #5c9ead;
       color: white;
     }
-
     .form-btns {
       display: flex;
       justify-content: center;
       gap: 20px;
       margin-top: 20px;
     }
-
     .form-btns button {
       background: #a8d0a2;
       border: none;
@@ -173,12 +126,10 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     .form-btns button:hover {
       background: #5c9ead;
       color: white;
     }
-
     iframe {
       width: 100%;
       height: 600px;
@@ -186,7 +137,20 @@
       border: 1px solid #ccc;
       margin-top: 20px;
     }
-
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #5c9ead;
+      color: white;
+    }
     .download-btn {
       display: block;
       margin: 20px auto 0;
@@ -199,42 +163,8 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     .download-btn:hover {
       background: #4a8c99;
-    }
-
-    .calendar {
-      text-align: center;
-    }
-
-    .calendar table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .calendar th {
-      background: #5c9ead;
-      color: white;
-      padding: 8px;
-    }
-
-    .calendar td {
-      padding: 8px;
-      border: 1px solid #ddd;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-      color: #777;
-    }
-
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -243,11 +173,6 @@
     <h1>Welcome, Sabina!</h1>
   </header>
 
-  <div class="search-bar">
-    <input type="text" placeholder="Search Forms & Templates..." />
-    <button>🔍</button>
-  </div>
-
   <nav>
     <button>Time Sheets</button>
     <button>Time Off</button>
@@ -255,7 +180,6 @@
     <button>Holidays</button>
     <button>Benefits</button>
     <button>Directory</button>
-    <button>IT Helpdesk</button>
     <button>Products</button>
   </nav>
 
@@ -265,55 +189,40 @@
 
       <div class="doc-grid" id="doc-grid">
         <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item">Applications</div>
         <div class="doc-item" onclick="showTemplate()">Templates</div>
-        <div class="doc-item">Projects</div>
-        <div class="doc-item">Employee Handbook</div>
-        <div class="doc-item">Policies & Procedures</div>
-        <div class="doc-item">Marketing Collateral</div>
-        <div class="doc-item">SOPs</div>
       </div>
 
-      <!-- Templates view -->
+      <!-- Templates -->
       <div id="template-view" style="display:none;">
         <h2>
           Templates 
           <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
         </h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview" allow="autoplay"></iframe>
+        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
         <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
       </div>
 
-      <!-- Request Forms view -->
+      <!-- Request Forms -->
       <div id="request-view" style="display:none;">
         <h2>
-          Request Forms 
+          Request Forms
           <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
         </h2>
         <div class="form-btns">
-          <button onclick="alert('HCM form clicked!')">HCM</button>
-          <button onclick="alert('HPH form clicked!')">HPH</button>
+          <button onclick="showTable('HCM')">HCM</button>
+          <button onclick="showTable('HPH')">HPH</button>
+        </div>
+
+        <div id="form-table" style="display:none;">
+          <h3 id="table-title"></h3>
+          <table id="data-table"></table>
+          <button class="back-btn" style="margin-top:15px;" onclick="hideTable()">⬅ Quay lại Request Forms</button>
         </div>
       </div>
     </section>
-
-    <section class="calendar">
-      <h2>Calendar</h2>
-      <table>
-        <tr>
-          <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
-        <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
-        <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
-        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
-        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
-        <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td></tr>
-      </table>
-      <p><b>Recurring Event:</b> Every Wednesday</p>
-    </section>
   </main>
 
-  <footer>
+  <footer style="text-align:center;padding:20px;color:#777;">
     © 2025 The Hub. All rights reserved.
   </footer>
 
@@ -340,10 +249,52 @@
     }
 
     function downloadTemplate() {
-      window.open(
-        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
-        "_blank"
-      );
+      window.open("https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx", "_blank");
+    }
+
+    // Hiển thị bảng khi chọn HCM / HPH
+    function showTable(type) {
+      const dataHCM = [
+        ["CIC", "CIC", "✓", "Container", "VND1300000", "VND2600000", "VND2600000"],
+        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
+        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
+        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
+        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"]
+      ];
+
+      const dataHPH = [
+        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
+        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
+        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
+        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"],
+        ["CIC", "CIC", "✓", "Container", "VND2500000", "VND5000000", "VND5000000"]
+      ];
+
+      const data = type === "HCM" ? dataHCM : dataHPH;
+
+      const table = document.getElementById("data-table");
+      table.innerHTML = `
+        <tr>
+          <th>Charge Name</th>
+          <th>Charge Name En</th>
+          <th>Is Must</th>
+          <th>PER CNTR / PER BILL</th>
+          <th>20GP</th>
+          <th>40GP</th>
+          <th>40HQ</th>
+        </tr>
+      `;
+
+      data.forEach(row => {
+        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
+      });
+
+      document.getElementById("table-title").innerText = type;
+      document.getElementById("form-table").style.display = "block";
+    }
+
+    function hideTable() {
+      document.getElementById("form-table").style.display = "none";
     }
   </script>
 </body>
