@@ -114,6 +114,24 @@
       color: #184d47;
       border-bottom: 2px solid #a8d0a2;
       padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      background: #5c9ead;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #4a8c99;
     }
 
     .doc-grid {
@@ -145,6 +163,23 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       margin-top: 20px;
+    }
+
+    .download-btn {
+      display: block;
+      margin: 20px auto 0;
+      background: #5c9ead;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .download-btn:hover {
+      background: #4a8c99;
     }
 
     .calendar {
@@ -216,7 +251,12 @@
         <div class="doc-item">SOPs</div>
       </div>
       <div id="template-view" style="display:none;">
+        <h2>
+          Templates 
+          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+        </h2>
         <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview" allow="autoplay"></iframe>
+        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
       </div>
     </section>
 
@@ -242,9 +282,22 @@
 
   <script>
     function showTemplate() {
-      document.getElementById("doc-title").innerText = "Templates";
+      document.getElementById("doc-title").style.display = "none";
       document.getElementById("doc-grid").style.display = "none";
       document.getElementById("template-view").style.display = "block";
+    }
+
+    function backToDocuments() {
+      document.getElementById("doc-title").style.display = "block";
+      document.getElementById("doc-grid").style.display = "grid";
+      document.getElementById("template-view").style.display = "none";
+    }
+
+    function downloadTemplate() {
+      window.open(
+        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
+        "_blank"
+      );
     }
   </script>
 </body>
