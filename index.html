@@ -224,21 +224,9 @@
       color: white;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .content-box {
       margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background: #5c9ead;
-      color: white;
+      line-height: 1.7;
     }
 
     footer {
@@ -252,44 +240,6 @@
       main {
         grid-template-columns: 1fr;
       }
-    }
-
-    /* Popup */
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .popup-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 600px;
-      text-align: left;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      position: relative;
-      line-height: 1.6;
-    }
-
-    .popup-content button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #5c9ead;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      padding: 5px 10px;
-    }
-
-    .popup-content button:hover {
-      background: #4a8c99;
     }
   </style>
 </head>
@@ -320,10 +270,10 @@
 
       <div class="doc-grid" id="doc-grid">
         <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item" onclick="showPopup('applications')">Applications</div>
+        <div class="doc-item" onclick="showSection('applications')">Applications</div>
         <div class="doc-item" onclick="showTemplate()">Templates</div>
-        <div class="doc-item" onclick="showPopup('projects')">Projects</div>
-        <div class="doc-item" onclick="showPopup('handbook')">Employee Handbook</div>
+        <div class="doc-item" onclick="showSection('projects')">Projects</div>
+        <div class="doc-item" onclick="showSection('handbook')">Employee Handbook</div>
         <div class="doc-item">Policies & Procedures</div>
         <div class="doc-item">Marketing Collateral</div>
         <div class="doc-item">SOPs</div>
@@ -356,6 +306,15 @@
           <button class="back-btn" style="margin-top:15px;" onclick="hideTable()">⬅ Quay lại Request Forms</button>
         </div>
       </div>
+
+      <!-- Applications / Projects / Handbook -->
+      <div id="info-view" style="display:none;">
+        <h2 id="info-title">
+          <span></span>
+          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+        </h2>
+        <div class="content-box" id="info-content"></div>
+      </div>
     </section>
 
     <section class="calendar">
@@ -378,62 +337,49 @@
     © 2025 The Hub. All rights reserved.
   </footer>
 
-  <!-- Popup hiển thị nội dung -->
-  <div class="popup" id="popup">
-    <div class="popup-content" id="popup-content">
-      <button onclick="closePopup()">✖</button>
-      <p id="popup-text"></p>
-    </div>
-  </div>
-
   <script>
-    function showTemplate() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "block";
-      document.getElementById("request-view").style.display = "none";
-    }
-
     function backToDocuments() {
       document.getElementById("doc-title").style.display = "block";
       document.getElementById("doc-grid").style.display = "grid";
       document.getElementById("template-view").style.display = "none";
       document.getElementById("request-view").style.display = "none";
+      document.getElementById("info-view").style.display = "none";
+    }
+
+    function showTemplate() {
+      document.getElementById("doc-title").style.display = "none";
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("template-view").style.display = "block";
     }
 
     function downloadTemplate() {
-      window.open(
-        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
-        "_blank"
-      );
+      window.open("https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx", "_blank");
     }
 
     function showRequestForms() {
       document.getElementById("doc-title").style.display = "none";
       document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "none";
       document.getElementById("request-view").style.display = "block";
     }
 
     function showTable(type) {
       const dataHCM = [
-        ["CIC", "CIC", "✓", "Container", "VND1300000", "VND2600000", "VND2600000"],
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"]
+        ["CIC","CIC","✓","Container","VND1300000","VND2600000","VND2600000"],
+        ["EMC","EMC","✓","Container","VND770000","VND1150000","VND1150000"],
+        ["CLEANING","CLEANING","✓","Container","VND400000","VND520000","VND520000"],
+        ["DOC","DOC","✓","Bill","VND1150000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3700000","VND5500000","VND5500000"]
       ];
 
       const dataHPH = [
-        ["EMC", "EMC", "✓", "Container", "VND770000", "VND1150000", "VND1150000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400000", "VND520000", "VND520000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1150000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3700000", "VND5500000", "VND5500000"],
-        ["CIC", "CIC", "✓", "Container", "VND2500000", "VND5000000", "VND5000000"]
+        ["EMC","EMC","✓","Container","VND770000","VND1150000","VND1150000"],
+        ["CLEANING","CLEANING","✓","Container","VND400000","VND520000","VND520000"],
+        ["DOC","DOC","✓","Bill","VND1150000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3700000","VND5500000","VND5500000"],
+        ["CIC","CIC","✓","Container","VND2500000","VND5000000","VND5000000"]
       ];
 
       const data = type === "HCM" ? dataHCM : dataHPH;
-
       const table = document.getElementById("data-table");
       table.innerHTML = `
         <tr>
@@ -446,10 +392,7 @@
           <th>40HQ</th>
         </tr>
       `;
-
-      data.forEach(row => {
-        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
-      });
+      data.forEach(row => table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`);
 
       document.getElementById("table-title").innerText = type;
       document.getElementById("form-table").style.display = "block";
@@ -459,32 +402,38 @@
       document.getElementById("form-table").style.display = "none";
     }
 
-    // Popup content
-    function showPopup(type) {
-      const popup = document.getElementById("popup");
-      const text = document.getElementById("popup-text");
-
+    function showSection(type) {
       const contents = {
-        applications: `1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.<br><br>
-        2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.`,
-        
-        projects: `Mức cược container:<br>
-        Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.<br>
-        Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.<br>
-        Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.`,
-        
-        handbook: `Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.<br><br>
-        <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
-        <b>Account NO.:</b> 345673979999<br>
-        <b>Bank:</b> MB BANK CHI NHÁNH HCM`
+        applications: {
+          title: "Applications",
+          content: `1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.<br><br>
+          2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.`
+        },
+        projects: {
+          title: "Projects",
+          content: `Mức cược container:<br>
+          Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.<br>
+          Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.<br>
+          Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.`
+        },
+        handbook: {
+          title: "Employee Handbook",
+          content: `Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.<br><br>
+          <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
+          <b>Account NO.:</b> 345673979999<br>
+          <b>Bank:</b> MB BANK CHI NHÁNH HCM`
+        }
       };
 
-      text.innerHTML = contents[type];
-      popup.style.display = "flex";
-    }
+      const info = contents[type];
+      document.getElementById("doc-title").style.display = "none";
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("template-view").style.display = "none";
+      document.getElementById("request-view").style.display = "none";
+      document.getElementById("info-view").style.display = "block";
 
-    function closePopup() {
-      document.getElementById("popup").style.display = "none";
+      document.querySelector("#info-title span").innerHTML = info.title;
+      document.getElementById("info-content").innerHTML = info.content;
     }
   </script>
 </body>
