@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Hub - Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    header {
+      background-color: #184d47;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      background-image: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=60");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 0;
+    }
+
+    header h1 {
+      position: relative;
+      z-index: 1;
+      font-size: 36px;
+      color: #fff;
+    }
+
+    .search-bar {
+      margin: 20px auto;
+      max-width: 600px;
+      display: flex;
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .search-bar input {
+      border: none;
+      padding: 12px 20px;
+      width: 100%;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .search-bar button {
+      background: #5c9ead;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .search-bar button:hover {
+      background: #4a8c99;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      background: #fff;
+      padding: 10px 0;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+    }
+
+    nav button {
+      background: #a8d0a2;
+      border: none;
+      margin: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    nav button:hover {
+      background: #5c9ead;
+      color: white;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    section {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #184d47;
+      border-bottom: 2px solid #a8d0a2;
+      padding-bottom: 8px;
+    }
+
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .doc-item {
+      background: #a8d0a2;
+      color: #184d47;
+      border-radius: 10px;
+      text-align: center;
+      padding: 20px 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .doc-item:hover {
+      background: #5c9ead;
+      color: white;
+    }
+
+    .calendar {
+      text-align: center;
+    }
+
+    .calendar table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .calendar th {
+      background: #5c9ead;
+      color: white;
+      padding: 8px;
+    }
+
+    .calendar td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome, Sabina!</h1>
+  </header>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Search Forms & Templates..." />
+    <button>🔍</button>
+  </div>
+
+  <nav>
+    <button>Time Sheets</button>
+    <button>Time Off</button>
+    <button>Expenses</button>
+    <button>Holidays</button>
+    <button>Benefits</button>
+    <button>Directory</button>
+    <button>IT Helpdesk</button>
+    <button>Products</button>
+  </nav>
+
+  <main>
+    <section>
+      <h2>Documents</h2>
+      <div class="doc-grid">
+        <div class="doc-item">Request Forms</div>
+        <div class="doc-item">Applications</div>
+        <div class="doc-item">Templates</div>
+        <div class="doc-item">Projects</div>
+        <div class="doc-item">Employee Handbook</div>
+        <div class="doc-item">Policies & Procedures</div>
+        <div class="doc-item">Marketing Collateral</div>
+        <div class="doc-item">SOPs</div>
+      </div>
+    </section>
+
+    <section class="calendar">
+      <h2>Calendar</h2>
+      <table>
+        <tr>
+          <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+        </tr>
+        <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+        <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+        <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td></tr>
+      </table>
+      <p><b>Recurring Event:</b> Every Wednesday</p>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 The Hub. All rights reserved.
+  </footer>
+</body>
+</html>
