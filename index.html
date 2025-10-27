@@ -229,31 +229,28 @@
       line-height: 1.7;
     }
 
-    /* 👇 Thêm phần form liên hệ nhỏ */
-    .contact-section {
-      margin-top: 30px;
-    }
-
-    .contact-cards {
+    /* Contact Cards */
+    .contacts {
       display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 40px auto;
       flex-wrap: wrap;
-      gap: 15px;
-      justify-content: space-around;
+      max-width: 900px;
     }
 
     .contact-card {
-      width: 30%;
-      background: #f9f9f9;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      width: 260px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
-      padding: 15px;
       transition: 0.3s;
     }
 
     .contact-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .contact-card img {
@@ -264,32 +261,24 @@
       margin-bottom: 10px;
     }
 
-    .contact-card h4 {
-      margin: 5px 0;
+    .contact-card h3 {
+      margin-bottom: 10px;
       color: #184d47;
     }
 
-    .contact-icons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 10px;
-    }
-
-    .contact-icons button {
+    .contact-buttons button {
       border: none;
-      background: #5c9ead;
-      color: white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin: 5px;
       cursor: pointer;
       font-size: 18px;
       transition: 0.3s;
     }
 
-    .contact-icons button:hover {
-      background: #4a8c99;
+    .contact-buttons button:hover {
+      background: #a8d0a2;
+      color: white;
     }
 
     footer {
@@ -302,9 +291,6 @@
     @media (max-width: 768px) {
       main {
         grid-template-columns: 1fr;
-      }
-      .contact-card {
-        width: 100%;
       }
     }
   </style>
@@ -340,63 +326,23 @@
         <div class="doc-item" onclick="showTemplate()">Templates</div>
         <div class="doc-item" onclick="showSection('projects')">Projects</div>
         <div class="doc-item" onclick="showSection('handbook')">Employee Handbook</div>
-        <div class="doc-item" onclick="showSection('Policies')">Policies & Procedures</div>
+        <div class="doc-item" onclick="showSection('policies')">Policies & Procedures</div>
         <div class="doc-item">Marketing Collateral</div>
         <div class="doc-item">SOPs</div>
       </div>
 
-      <!-- 👇 Form nhỏ liên hệ -->
-      <div class="contact-section">
-        <h3>Contact Team</h3>
-        <div class="contact-cards">
-          <div class="contact-card">
-            <img src="https://i.pravatar.cc/80?img=1" alt="Avatar 1">
-            <h4>Ms. Linh</h4>
-            <div class="contact-icons">
-              <button onclick="showPhone('0938 111 222')">📞</button>
-              <button onclick="openZalo('https://zalo.me/0938111222')">💬</button>
-            </div>
-          </div>
-          <div class="contact-card">
-            <img src="https://i.pravatar.cc/80?img=5" alt="Avatar 2">
-            <h4>Mr. Long</h4>
-            <div class="contact-icons">
-              <button onclick="showPhone('0909 333 555')">📞</button>
-              <button onclick="openZalo('https://zalo.me/0909333555')">💬</button>
-            </div>
-          </div>
-          <div class="contact-card">
-            <img src="https://i.pravatar.cc/80?img=8" alt="Avatar 3">
-            <h4>Ms. Hoa</h4>
-            <div class="contact-icons">
-              <button onclick="showPhone('0917 777 888')">📞</button>
-              <button onclick="openZalo('https://zalo.me/0917777888')">💬</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Templates -->
       <div id="template-view" style="display:none;">
-        <h2>
-          Templates 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview" allow="autoplay"></iframe>
+        <h2>Templates <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
+        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
         <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
       </div>
 
-      <!-- Request Forms -->
       <div id="request-view" style="display:none;">
-        <h2>
-          Request Forms 
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
+        <h2>Request Forms <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
         <div class="form-btns">
           <button onclick="showTable('HCM')">HCM</button>
           <button onclick="showTable('HPH')">HPH</button>
         </div>
-
         <div id="form-table" style="display:none;">
           <h3 id="table-title"></h3>
           <table id="data-table"></table>
@@ -404,12 +350,8 @@
         </div>
       </div>
 
-      <!-- Applications / Projects / Handbook -->
       <div id="info-view" style="display:none;">
-        <h2 id="info-title">
-          <span></span>
-          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-        </h2>
+        <h2 id="info-title"><span></span><button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
         <div class="content-box" id="info-content"></div>
       </div>
     </section>
@@ -417,9 +359,7 @@
     <section class="calendar">
       <h2>Calendar</h2>
       <table>
-        <tr>
-          <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
+        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
         <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
         <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
         <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
@@ -429,6 +369,36 @@
       <p><b>Recurring Event:</b> Every Wednesday</p>
     </section>
   </main>
+
+  <!-- Contact Section -->
+  <div class="contacts">
+    <div class="contact-card">
+      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="avatar" />
+      <h3>Sabina - Admin</h3>
+      <div class="contact-buttons">
+        <button onclick="alert('📞 0901 234 567')">📞</button>
+        <button onclick="window.open('https://zalo.me/0901234567','_blank')">💬</button>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="avatar" />
+      <h3>David - Support</h3>
+      <div class="contact-buttons">
+        <button onclick="alert('📞 0912 888 666')">📞</button>
+        <button onclick="window.open('https://zalo.me/0912888666','_blank')">💬</button>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <img src="https://randomuser.me/api/portraits/men/51.jpg" alt="avatar" />
+      <h3>Long - Operations</h3>
+      <div class="contact-buttons">
+        <button onclick="alert('📞 0933 777 222')">📞</button>
+        <button onclick="window.open('https://zalo.me/0933777222','_blank')">💬</button>
+      </div>
+    </div>
+  </div>
 
   <footer>
     © 2025 The Hub. All rights reserved.
@@ -519,12 +489,12 @@
           <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
           <b>Account NO.:</b> 345673979999<br>
           <b>Bank:</b> MB BANK CHI NHÁNH HCM`
-        }
-        Policies: {
+        },
+        policies: {
           title: "Policies & Procedures",
-          content: `Hồ sơ hoàn cược:<br><br>
-          Đối với hàng nhập về  HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này. 
-          Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email:  doc_hph@kimberryline.com và fin_vn@kimberryline.com (không yêu cầu bản gốc công văn hoàn cược)
+          content: `Hồ sơ hoàn cược:<br>
+          Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>
+          Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).`
         }
       };
 
