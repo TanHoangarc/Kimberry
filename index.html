@@ -229,26 +229,26 @@
       line-height: 1.7;
     }
 
-    /* Contact Cards */
     .contacts {
       display: flex;
       justify-content: center;
       gap: 25px;
       margin: 40px auto;
-      flex-wrap: wrap;
-      max-width: 900px;
+      flex-wrap: nowrap; /* giữ cùng 1 hàng */
+      max-width: 1080px; /* nhỏ hơn main 1 chút */
     }
-
+    
     .contact-card {
       background: white;
       border-radius: 15px;
       padding: 20px;
-      width: 260px;
+      width: 300px; /* tăng nhẹ, chia đều trong max-width */
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
       transition: 0.3s;
+      flex-shrink: 0; /* tránh co lại */
     }
-
+    
     .contact-card:hover {
       transform: translateY(-5px);
     }
@@ -429,41 +429,47 @@
       document.getElementById("request-view").style.display = "block";
     }
 
+    <script>
     function showTable(type) {
       const dataHCM = [
-        ["CIC","CIC","✓","Container","VND1300000","VND2600000","VND2600000"],
-        ["EMC","EMC","✓","Container","VND770000","VND1150000","VND1150000"],
-        ["CLEANING","CLEANING","✓","Container","VND400000","VND520000","VND520000"],
-        ["DOC","DOC","✓","Bill","VND1150000","-","-"],
-        ["DTHC","DESTINATION THC","✓","Container","VND3700000","VND5500000","VND5500000"]
+        ["CIC","CIC","✓","Container","VND1,300,000","VND2,600,000","VND2,600,000"],
+        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
+        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
+        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"]
       ];
-
+    
       const dataHPH = [
-        ["EMC","EMC","✓","Container","VND770000","VND1150000","VND1150000"],
-        ["CLEANING","CLEANING","✓","Container","VND400000","VND520000","VND520000"],
-        ["DOC","DOC","✓","Bill","VND1150000","-","-"],
-        ["DTHC","DESTINATION THC","✓","Container","VND3700000","VND5500000","VND5500000"],
-        ["CIC","CIC","✓","Container","VND2500000","VND5000000","VND5000000"]
+        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
+        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
+        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"],
+        ["CIC","CIC","✓","Container","VND2,500,000","VND5,000,000","VND5,000,000"]
       ];
-
+    
       const data = type === "HCM" ? dataHCM : dataHPH;
       const table = document.getElementById("data-table");
+    
       table.innerHTML = `
         <tr>
           <th>Charge Name</th>
           <th>Charge Name En</th>
           <th>Is Must</th>
-          <th>PER CNTR / PER BILL</th>
+          <th>Per CNTR / Per BILL</th>
           <th>20GP</th>
           <th>40GP</th>
           <th>40HQ</th>
         </tr>
       `;
-      data.forEach(row => table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`);
-
+    
+      data.forEach(row => {
+        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
+      });
+    
       document.getElementById("table-title").innerText = type;
       document.getElementById("form-table").style.display = "block";
     }
+    </script>
 
     function hideTable() {
       document.getElementById("form-table").style.display = "none";
