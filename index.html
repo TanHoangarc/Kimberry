@@ -163,6 +163,69 @@
     .download-btn:hover {
       background: #4a8c99;
     }
+    .upload-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .upload-section h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .hbl-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .hbl-search label {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .hbl-search input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .upload-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .upload-area input[type="file"] {
+      flex: 1;
+    }
+    
+    .upload-area button {
+      background-color: #5C9EAD;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .upload-area button:hover {
+      background-color: #A8D0A2;
+    }
+    
+    #uploadStatus {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #333;
+    }
     .calendar {
       text-align: center; 
     } 
@@ -295,11 +358,24 @@
       </div>
 
       <!-- Marketing Collateral -->
-      <div id="marketing-view" style="display:none;">
-        <h2>Marketing Collateral <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <p>Tải lên tài liệu hoặc hình ảnh marketing (sẽ hiển thị ngay bên dưới):</p>
-        <input type="file" id="fileInput" multiple accept="image/*,application/pdf" />
-        <div id="previewArea" style="margin-top:20px;"></div>
+      <div class="upload-section">
+        <h3>Marketing Collateral</h3>
+      
+        <!-- Ô nhập HBL -->
+        <div class="hbl-search">
+          <label for="searchHBL">Nhập HBL:</label>
+          <input type="text" id="searchHBL" placeholder="Nhập mã HBL..." />
+        </div>
+      
+        <!-- Khu vực upload -->
+        <div class="upload-area">
+          <input type="file" id="fileInput" />
+          <button id="uploadBtn">Upload</button>
+          <button id="doneBtn">Hoàn thành</button>
+        </div>
+      
+        <!-- Kết quả -->
+        <div id="uploadStatus"></div>
       </div>
 
       <div id="template-view" style="display:none;">
@@ -490,32 +566,26 @@
       document.getElementById("info-content").innerHTML = info.content;
     }
     // Preview uploaded marketing files
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("fileInput");
-      const preview = document.getElementById("previewArea");
-      if (input) {
-        input.addEventListener("change", () => {
-          preview.innerHTML = "";
-          [...input.files].forEach(file => {
-            const url = URL.createObjectURL(file);
-            if (file.type.includes("image")) {
-              const img = document.createElement("img");
-              img.src = url;
-              img.style.maxWidth = "200px";
-              img.style.margin = "10px";
-              img.style.borderRadius = "10px";
-              preview.appendChild(img);
-            } else if (file.type === "application/pdf") {
-              const link = document.createElement("a");
-              link.href = url;
-              link.textContent = "📄 " + file.name;
-              link.target = "_blank";
-              link.style.display = "block";
-              link.style.margin = "10px 0";
-              preview.appendChild(link);
-            }
-          });
-        });
+    document.getElementById('doneBtn').addEventListener('click', function() {
+      const hbl = document.getElementById('searchHBL').value.trim();
+      const file = document.getElementById('fileInput').files[0];
+      const status = document.getElementById('uploadStatus');
+    
+      if (!hbl) {
+        status.innerHTML = "⚠️ Vui lòng nhập HBL trước khi tải lên.";
+        return;
+      }
+      if (!file) {
+        status.innerHTML = "⚠️ Vui lòng chọn file để tải lên.";
+        return;
+      }
+    
+      // Giả lập tiến trình upload
+      status.innerHTML = "⏳ Đang tải file lên Google Drive...";
+      setTimeout(() => {
+        status.innerHTML = `✅ File "${file.name}" đã được tải lên thành công cho HBL "${hbl}".`;
+      }, 2000);
+    });
       }
     });
   </script>
