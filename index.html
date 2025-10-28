@@ -24,10 +24,7 @@
     header::after {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background-color: rgba(0,0,0,0.5);
       z-index: 0;
     }
@@ -61,9 +58,8 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .search-bar button:hover {
-      background: #4a8c99;
-    }
+    .search-bar button:hover { background: #4a8c99; }
+
     nav {
       display: flex;
       justify-content: center;
@@ -86,6 +82,7 @@
       background: #5c9ead;
       color: white;
     }
+
     main {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -118,9 +115,8 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .back-btn:hover {
-      background: #4a8c99;
-    }
+    .back-btn:hover { background: #4a8c99; }
+
     .doc-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -141,6 +137,7 @@
       background: #5c9ead;
       color: white;
     }
+
     iframe {
       width: 100%;
       height: 600px;
@@ -148,6 +145,7 @@
       border: 1px solid #ccc;
       margin-top: 20px;
     }
+
     .download-btn {
       display: block;
       margin: 20px auto 0;
@@ -160,9 +158,8 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .download-btn:hover {
-      background: #4a8c99;
-    }
+    .download-btn:hover { background: #4a8c99; }
+
     .upload-section {
       background: #fff;
       padding: 20px;
@@ -170,25 +167,21 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 500px;
+      margin-top: 20px;
     }
-    
-    .upload-section h3 {
-      margin-bottom: 15px;
-      color: #333;
-    }
-    
+
+    .upload-section h3 { margin-bottom: 15px; color: #333; }
+
     .hbl-search {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 15px;
     }
-    
     .hbl-search label {
       font-weight: 600;
       color: #333;
     }
-    
     .hbl-search input {
       flex: 1;
       padding: 6px 10px;
@@ -196,17 +189,13 @@
       border-radius: 6px;
       font-size: 14px;
     }
-    
+
     .upload-area {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    
-    .upload-area input[type="file"] {
-      flex: 1;
-    }
-    
+    .upload-area input[type="file"] { flex: 1; }
     .upload-area button {
       background-color: #5C9EAD;
       color: white;
@@ -216,28 +205,21 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    
-    .upload-area button:hover {
-      background-color: #A8D0A2;
-    }
-    
-    #uploadStatus {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #333;
-    }
-    .calendar {
-      text-align: center; 
-    } 
+    .upload-area button:hover { background-color: #A8D0A2; }
+
+    #uploadStatus { margin-top: 10px; font-size: 13px; color: #333; }
+
+    .calendar { text-align: center; }
     .calendar table {
       width: 100%;
-      border-collapse: collapse; 
-    } 
-    .calendar th { 
+      border-collapse: collapse;
+    }
+    .calendar th {
       background: #5c9ead;
       color: white;
-      padding: 8px; 
+      padding: 8px;
     }
+
     #data-table {
       width: 100%;
       border-collapse: collapse;
@@ -249,12 +231,9 @@
       padding: 10px;
       text-align: center;
     }
-    #data-table tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    #data-table tr:hover {
-      background-color: #f1f1f1;
-    }
+    #data-table tr:nth-child(even) { background-color: #f9f9f9; }
+    #data-table tr:hover { background-color: #f1f1f1; }
+
     .form-btns {
       display: flex;
       justify-content: center;
@@ -270,14 +249,10 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .form-btns button:hover {
-      background: #5c9ead;
-      color: white;
-    }
-    .content-box {
-      margin-top: 20px;
-      line-height: 1.7;
-    }
+    .form-btns button:hover { background: #5c9ead; color: white; }
+
+    .content-box { margin-top: 20px; line-height: 1.7; }
+
     .contacts {
       display: flex;
       justify-content: center;
@@ -315,6 +290,7 @@
       transition: 0.3s;
     }
     .contact-buttons button:hover { background: #a8d0a2; color: white; }
+
     footer {
       text-align: center;
       padding: 20px;
@@ -357,25 +333,21 @@
         <div class="doc-item">SOPs</div>
       </div>
 
-      <!-- Marketing Collateral -->
-      <div class="upload-section">
-        <h3>Marketing Collateral</h3>
-      
-        <!-- Ô nhập HBL -->
-        <div class="hbl-search">
-          <label for="searchHBL">Nhập HBL:</label>
-          <input type="text" id="searchHBL" placeholder="Nhập mã HBL..." />
+      <!-- Upload Marketing -->
+      <div id="marketing-view" style="display:none;">
+        <div class="upload-section">
+          <h3>Marketing Collateral</h3>
+          <div class="hbl-search">
+            <label for="searchHBL">Nhập HBL:</label>
+            <input type="text" id="searchHBL" placeholder="Nhập mã HBL..." />
+          </div>
+          <div class="upload-area">
+            <input type="file" id="fileInput" />
+            <button id="uploadBtn">Upload</button>
+            <button id="doneBtn">Hoàn thành</button>
+          </div>
+          <div id="uploadStatus"></div>
         </div>
-      
-        <!-- Khu vực upload -->
-        <div class="upload-area">
-          <input type="file" id="fileInput" />
-          <button id="uploadBtn">Upload</button>
-          <button id="doneBtn">Hoàn thành</button>
-        </div>
-      
-        <!-- Kết quả -->
-        <div id="uploadStatus"></div>
       </div>
 
       <div id="template-view" style="display:none;">
@@ -417,7 +389,6 @@
     </section>
   </main>
 
-  <!-- Contacts -->
   <div class="contacts">
     <div class="contact-card">
       <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="avatar" />
@@ -446,148 +417,76 @@
   </div>
 
   <footer>© 2025 The Hub. All rights reserved.</footer>
-
   <script>
-    function showMarketing() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("marketing-view").style.display = "block";
-    }
-    function backToDocuments() {
-      document.getElementById("doc-title").style.display = "block";
-      document.getElementById("doc-grid").style.display = "grid";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-      document.getElementById("info-view").style.display = "none";
-      document.getElementById("marketing-view").style.display = "none"; // thêm dòng này
-    }
-  
-    function showTemplate() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "block";
-    }
-  
-    function downloadTemplate() {
-      window.open(
-        "https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx",
-        "_blank"
-      );
-    }
-  
-    function showRequestForms() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("request-view").style.display = "block";
-    }
-  
-    function showTable(type) {
-      const dataHCM = [
-        ["CIC", "CIC", "✓", "Container", "VND1,300,000", "VND2,600,000", "VND2,600,000"],
-        ["EMC", "EMC", "✓", "Container", "VND770,000", "VND1,150,000", "VND1,150,000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400,000", "VND520,000", "VND520,000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1,150,000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3,700,000", "VND5,500,000", "VND5,500,000"]
-      ];
-  
-      const dataHPH = [
-        ["EMC", "EMC", "✓", "Container", "VND770,000", "VND1,150,000", "VND1,150,000"],
-        ["CLEANING", "CLEANING", "✓", "Container", "VND400,000", "VND520,000", "VND520,000"],
-        ["DOC", "DOC", "✓", "Bill", "VND1,150,000", "-", "-"],
-        ["DTHC", "DESTINATION THC", "✓", "Container", "VND3,700,000", "VND5,500,000", "VND5,500,000"],
-        ["CIC", "CIC", "✓", "Container", "VND2,500,000", "VND5,000,000", "VND5,000,000"]
-      ];
-  
-      const data = type === "HCM" ? dataHCM : dataHPH;
-      const table = document.getElementById("data-table");
-  
-      // 🧩 HTML cho bảng
-      table.innerHTML = `
-        <thead>
-          <tr style="background-color:#5c9ead; color:white;">
-            <th>Charge Name</th>
-            <th>Charge Name En</th>
-            <th>Is Must</th>
-            <th>Per CNTR / Per BILL</th>
-            <th>20GP</th>
-            <th>40GP</th>
-            <th>40HQ</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${data.map(row => `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`).join("")}
-        </tbody>
-      `;
-  
-      document.getElementById("table-title").innerText = `Tariff ${type}`;
-      document.getElementById("form-table").style.display = "block";
-    }
-  
-    function hideTable() {
-      document.getElementById("form-table").style.display = "none";
-    }
-  
-    function showSection(type) {
-      const contents = {
-        applications: {
-          title: "Hướng dẫn Hàng nhập",
-          content: `1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.<br><br>
-          2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.`
-        },
-        projects: {
-          title: "Quy định Cược cont",
-          content: `Mức cược container:<br>
-          Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.<br>
-          Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.<br>
-          Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.`
-        },
-        handbook: {
-          title: "Thông tin tài khoản Kimberry",
-          content: `Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.<br><br>
-          <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
-          <b>Account NO.:</b> 345673979999<br>
-          <b>Bank:</b> MB BANK CHI NHÁNH HCM`
-        },
-        policies: {
-          title: "Hồ sơ Hoàn cược",
-          content: `Hồ sơ hoàn cược:<br>
-          Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>
-          Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).`
-        }
-      };
-  
-      const info = contents[type];
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-      document.getElementById("info-view").style.display = "block";
-      document.querySelector("#info-title span").innerHTML = info.title;
-      document.getElementById("info-content").innerHTML = info.content;
-    }
-    // Preview uploaded marketing files
-    document.getElementById('doneBtn').addEventListener('click', function() {
-      const hbl = document.getElementById('searchHBL').value.trim();
-      const file = document.getElementById('fileInput').files[0];
-      const status = document.getElementById('uploadStatus');
-    
-      if (!hbl) {
-        status.innerHTML = "⚠️ Vui lòng nhập HBL trước khi tải lên.";
-        return;
-      }
+  // Khi tài liệu sẵn sàng
+  document.addEventListener("DOMContentLoaded", () => {
+    const fileInput = document.getElementById("fileInput");
+    const uploadButton = document.getElementById("uploadButton");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const monthFilter = document.getElementById("monthFilter");
+    const tableBody = document.querySelector("#fileTable tbody");
+    const cards = document.querySelectorAll(".card");
+    const sections = document.querySelectorAll(".section");
+
+    // Chuyển đổi giữa các tab
+    cards.forEach(card => {
+      card.addEventListener("click", () => {
+        const section = card.dataset.section;
+        sections.forEach(sec => sec.style.display = "none");
+        document.getElementById(section).style.display = "block";
+      });
+    });
+
+    // Sự kiện upload file
+    uploadButton.addEventListener("click", async () => {
+      const file = fileInput.files[0];
       if (!file) {
-        status.innerHTML = "⚠️ Vui lòng chọn file để tải lên.";
+        uploadStatus.textContent = "⚠️ Vui lòng chọn file trước.";
+        uploadStatus.style.color = "#d9534f";
         return;
       }
-    
-      // Giả lập tiến trình upload
-      status.innerHTML = "⏳ Đang tải file lên Google Drive...";
+
+      uploadStatus.textContent = "⏳ Đang tải lên...";
+      uploadStatus.style.color = "#333";
+
+      // Giả lập upload (thay bằng API thật khi có backend)
       setTimeout(() => {
-        status.innerHTML = `✅ File "${file.name}" đã được tải lên thành công cho HBL "${hbl}".`;
-      }, 2000);
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        addFileRow(file.name, currentMonth, "Hoàn tất");
+        uploadStatus.textContent = "✅ Tải lên thành công!";
+        uploadStatus.style.color = "#28a745";
+        fileInput.value = "";
+      }, 1500);
     });
-      }
+
+    // Thêm file vào bảng
+    function addFileRow(name, month, status) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${month}</td>
+        <td>${status}</td>
+      `;
+      tableBody.appendChild(row);
+    }
+
+    // Lọc file theo tháng
+    monthFilter.addEventListener("change", () => {
+      const selectedMonth = monthFilter.value;
+      const rows = tableBody.querySelectorAll("tr");
+      rows.forEach(row => {
+        const month = row.cells[1].textContent;
+        row.style.display = (selectedMonth === "" || month === selectedMonth) ? "" : "none";
+      });
     });
-  </script>
+
+    // Hiệu ứng hover nhẹ
+    document.querySelectorAll(".card").forEach(card => {
+      card.addEventListener("mouseenter", () => card.style.transform = "scale(1.05)");
+      card.addEventListener("mouseleave", () => card.style.transform = "scale(1)");
+    });
+  });
+</script>
+
 </body>
 </html>
