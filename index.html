@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Hub - Dashboard</title>
+  <title>The Hub - Kimberry Portal</title>
   <style>
     body {
       margin: 0;
@@ -11,7 +11,6 @@
       background-color: #f4f4f4;
       color: #333;
     }
-
     header {
       background-color: #184d47;
       color: white;
@@ -22,7 +21,6 @@
       background-position: center;
       position: relative;
     }
-
     header::after {
       content: "";
       position: absolute;
@@ -30,14 +28,12 @@
       background-color: rgba(0,0,0,0.5);
       z-index: 0;
     }
-
     header h1 {
       position: relative;
       z-index: 1;
       font-size: 36px;
       color: #fff;
     }
-
     .search-bar {
       margin: 20px auto;
       max-width: 600px;
@@ -47,7 +43,6 @@
       overflow: hidden;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .search-bar input {
       border: none;
       padding: 12px 20px;
@@ -55,20 +50,13 @@
       outline: none;
       font-size: 16px;
     }
-
     .search-bar button {
       background: #5c9ead;
       color: white;
       border: none;
       padding: 0 20px;
       cursor: pointer;
-      transition: 0.3s;
     }
-
-    .search-bar button:hover {
-      background: #4a8c99;
-    }
-
     nav {
       display: flex;
       justify-content: center;
@@ -77,7 +65,6 @@
       padding: 10px 0;
       box-shadow: 0 2px 3px rgba(0,0,0,0.05);
     }
-
     nav button {
       background: #a8d0a2;
       border: none;
@@ -88,12 +75,10 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     nav button:hover {
       background: #5c9ead;
       color: white;
     }
-
     main {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -102,14 +87,12 @@
       max-width: 1200px;
       margin: auto;
     }
-
     section {
       background: white;
       border-radius: 15px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-
     h2 {
       color: #184d47;
       border-bottom: 2px solid #a8d0a2;
@@ -118,7 +101,6 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .back-btn {
       background: #5c9ead;
       color: white;
@@ -127,20 +109,13 @@
       border-radius: 6px;
       font-size: 13px;
       cursor: pointer;
-      transition: 0.3s;
     }
-
-    .back-btn:hover {
-      background: #4a8c99;
-    }
-
     .doc-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 15px;
       margin-top: 20px;
     }
-
     .doc-item {
       background: #a8d0a2;
       color: #184d47;
@@ -151,223 +126,90 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     .doc-item:hover {
       background: #5c9ead;
       color: white;
     }
-
     iframe {
       width: 100%;
-      height: 600px;
+      height: 500px;
       border-radius: 10px;
       border: 1px solid #ccc;
       margin-top: 20px;
     }
-
-    .download-btn {
-      display: block;
-      margin: 20px auto 0;
-      background: #5c9ead;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .download-btn:hover {
-      background: #4a8c99;
-    }
-
-    .calendar {
-      text-align: center;
-    }
-
-    .calendar table {
+    table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
     }
-
-    .calendar th {
-      background: #5c9ead;
-      color: white;
-      padding: 8px;
-    }
-
-    .calendar td {
-      padding: 8px;
+    table, th, td {
       border: 1px solid #ddd;
+      text-align: center;
+      padding: 8px;
     }
-
-    .form-btns {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .form-btns button {
-      background: #a8d0a2;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .form-btns button:hover {
+    th {
       background: #5c9ead;
       color: white;
     }
-
-    .content-box {
-      margin-top: 20px;
-      line-height: 1.7;
-    }
-
-    .contacts {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      margin: 40px auto;
-      flex-wrap: nowrap; /* giữ cùng 1 hàng */
-      max-width: 1080px; /* nhỏ hơn main 1 chút */
-    }
-    
-    .contact-card {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      width: 200px; /* tăng nhẹ, chia đều trong max-width */
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: 0.3s;
-      flex-shrink: 0; /* tránh co lại */
-    }
-    
-    .contact-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .contact-card img {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-
-    .contact-card h3 {
-      margin-bottom: 10px;
-      color: #184d47;
-    }
-
-    .contact-buttons button {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      margin: 5px;
-      cursor: pointer;
-      font-size: 18px;
-      transition: 0.3s;
-    }
-
-    .contact-buttons button:hover {
-      background: #a8d0a2;
-      color: white;
-    }
-
     footer {
       text-align: center;
       padding: 20px;
       font-size: 14px;
       color: #777;
     }
-
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Welcome, Sabina!</h1>
-  </header>
+  <header><h1>The Hub - Kimberry Portal</h1></header>
 
   <div class="search-bar">
-    <input type="text" placeholder="Search Forms & Templates..." />
+    <input type="text" placeholder="Search..." />
     <button>🔍</button>
   </div>
 
   <nav>
-    <button>Time Sheets</button>
-    <button>Time Off</button>
-    <button>Expenses</button>
-    <button>Holidays</button>
-    <button>Benefits</button>
-    <button>Directory</button>
-    <button>IT Helpdesk</button>
-    <button>Products</button>
+    <button onclick="showTable('HCM')">Tariff Vietnam (HCM)</button>
+    <button onclick="showTable('HPH')">Tariff Vietnam (HPH)</button>
+    <button onclick="showSection('applications')">Hướng dẫn</button>
+    <button onclick="showSection('projects')">Quy định Cược</button>
+    <button onclick="showSection('handbook')">Tài khoản Kimberry</button>
+    <button onclick="showSection('policies')">Hồ sơ Hoàn cược</button>
+    <button onclick="showMarketing()">Marketing Collateral</button>
   </nav>
 
   <main>
     <section id="doc-section">
       <h2 id="doc-title">Documents</h2>
-
       <div class="doc-grid" id="doc-grid">
-        <div class="doc-item" onclick="showRequestForms()">Tariff Vietnam</div>
+        <div class="doc-item" onclick="showTable('HCM')">Tariff HCM</div>
+        <div class="doc-item" onclick="showTable('HPH')">Tariff HPH</div>
         <div class="doc-item" onclick="showSection('applications')">Hướng dẫn</div>
         <div class="doc-item" onclick="showSection('projects')">Quy định Cược</div>
         <div class="doc-item" onclick="showSection('handbook')">Tài khoản Kimberry</div>
         <div class="doc-item" onclick="showSection('policies')">Hồ sơ Hoàn cược</div>
-        <div class="doc-item" onclick="showTemplate()">File mẫu CVHC</div>
         <div class="doc-item" onclick="showMarketing()">Marketing Collateral</div>
-        <div class="doc-item">SOPs</div>
       </div>
 
-      <div id="template-view" style="display:none;">
-        <h2>File mẫu CVHC<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
-        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
-      </div>
-
-      <div id="request-view" style="display:none;">
-        <h2>Tariff Việt Nam<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <div class="form-btns">
-          <button onclick="showTable('HCM')">HCM</button>
-          <button onclick="showTable('HPH')">HPH</button>
-        </div>
-        <div id="form-table" style="display:none;">
-          <h3 id="table-title"></h3>
-          <table id="data-table"></table>
-          <button class="back-btn" style="margin-top:15px;" onclick="hideTable()">⬅ Quay lại Request Forms</button>
-        </div>
-      </div>
-
-      <div id="info-view" style="display:none;">
-        <h2 id="info-title"><span></span><button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <div class="content-box" id="info-content"></div>
-      </div>
-    </section>
-    
-    <div id="marketing-view" style="display:none;">
-      <h2>Marketing Collateral
+      <div id="content-view" style="display:none;">
+        <h2 id="content-title"></h2>
+        <p id="content-body"></p>
         <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
-      </h2>
-    
-      <div class="content-box">
-        <p>Upload tài liệu Marketing, ảnh hoặc file PDF để lưu trên Google Drive.</p>
+      </div>
+
+      <div id="table-view" style="display:none;">
+        <h2 id="table-title"></h2>
+        <table id="data-table"></table>
+        <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+      </div>
+
+      <div id="marketing-view" style="display:none;">
+        <h2>Marketing Collateral <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
+        <p>Tải file marketing của bạn lên Google Drive.</p>
         <input type="file" id="fileInput" />
-        <button class="download-btn" onclick="uploadToDrive()">⬆ Hoàn thành / Upload</button>
+        <button onclick="handleUpload()">⬆ Upload</button>
         <p id="uploadStatus"></p>
       </div>
-    </div>
+    </section>
 
     <section class="calendar">
       <h2>Calendar</h2>
@@ -383,107 +225,31 @@
     </section>
   </main>
 
-  <!-- Contact Section -->
-  <div class="contacts">
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="avatar" />
-      <h3>Sabina - Admin</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0901 234 567')">📞</button>
-        <button onclick="window.open('https://zalo.me/0901234567','_blank')">💬</button>
-      </div>
-    </div>
+  <footer>© 2025 The Hub - Kimberry</footer>
 
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="avatar" />
-      <h3>David - Support</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0912 888 666')">📞</button>
-        <button onclick="window.open('https://zalo.me/0912888666','_blank')">💬</button>
-      </div>
-    </div>
-
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/men/51.jpg" alt="avatar" />
-      <h3>Long - Operations</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0933 777 222')">📞</button>
-        <button onclick="window.open('https://zalo.me/0933777222','_blank')">💬</button>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    © 2025 The Hub. All rights reserved.
-  </footer>
-
+  <script src="https://apis.google.com/js/api.js"></script>
   <script>
-    function backToDocuments() {
-      document.getElementById("doc-title").style.display = "block";
-      document.getElementById("doc-grid").style.display = "grid";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-      document.getElementById("info-view").style.display = "none";
-    }
+    const CLIENT_ID = "YOUR_CLIENT_ID_HERE.apps.googleusercontent.com";
+    const API_KEY = "YOUR_API_KEY_HERE";
+    const SCOPES = "https://www.googleapis.com/auth/drive.file";
+    let tokenClient, accessToken = null;
 
-    function showTemplate() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "block";
-    }
-
-    function downloadTemplate() {
-      window.open("https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/export?format=docx", "_blank");
-    }
-
-    function showRequestForms() {
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("request-view").style.display = "block";
-    }
-
-    function showTable(type) {
-      const dataHCM = [
-        ["CIC","CIC","✓","Container","VND1,300,000","VND2,600,000","VND2,600,000"],
-        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
-        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
-        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
-        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"]
-      ];
-    
-      const dataHPH = [
-        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
-        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
-        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
-        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"],
-        ["CIC","CIC","✓","Container","VND2,500,000","VND5,000,000","VND5,000,000"]
-      ];
-    
-      const data = type === "HCM" ? dataHCM : dataHPH;
-      const table = document.getElementById("data-table");
-    
-      table.innerHTML = `
-        <tr>
-          <th>Charge Name</th>
-          <th>Charge Name En</th>
-          <th>Is Must</th>
-          <th>Per CNTR / Per BILL</th>
-          <th>20GP</th>
-          <th>40GP</th>
-          <th>40HQ</th>
-        </tr>
-      `;
-    
-      data.forEach(row => {
-        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
+    gapi.load("client", async () => {
+      await gapi.client.init({ apiKey: API_KEY });
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (tokenResponse) => {
+          accessToken = tokenResponse.access_token;
+        }
       });
-    
-      document.getElementById("table-title").innerText = type;
-      document.getElementById("form-table").style.display = "block";
-    }
+    });
 
-    function hideTable() {
-      document.getElementById("form-table").style.display = "none";
+    function backToDocuments() {
+      ["doc-grid","table-view","content-view","marketing-view"].forEach(id => {
+        document.getElementById(id).style.display = id === "doc-grid" ? "grid" : "none";
+      });
+      document.getElementById("doc-title").innerText = "Documents";
     }
 
     function showSection(type) {
@@ -511,70 +277,73 @@
           title: "Hồ sơ Hoàn cược",
           content: `Hồ sơ hoàn cược:<br>
           Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>
-          Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).`
+          Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b>.`
         }
       };
-      
-    function showMarketing() {
-      document.getElementById("doc-title").style.display = "none";
+
+      const section = contents[type];
       document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("marketing-view").style.display = "block";
+      document.getElementById("content-view").style.display = "block";
+      document.getElementById("content-title").innerHTML = section.title;
+      document.getElementById("content-body").innerHTML = section.content;
     }
-    
-    async function uploadToDrive() {
-      const fileInput = document.getElementById("fileInput");
+
+    function showTable(type) {
+      const dataHCM = [
+        ["CIC","CIC","✓","Container","VND1,300,000","VND2,600,000","VND2,600,000"],
+        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
+        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
+        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"]
+      ];
+      const dataHPH = [
+        ["EMC","EMC","✓","Container","VND770,000","VND1,150,000","VND1,150,000"],
+        ["CLEANING","CLEANING","✓","Container","VND400,000","VND520,000","VND520,000"],
+        ["DOC","DOC","✓","Bill","VND1,150,000","-","-"],
+        ["DTHC","DESTINATION THC","✓","Container","VND3,700,000","VND5,500,000","VND5,500,000"],
+        ["CIC","CIC","✓","Container","VND2,500,000","VND5,000,000","VND5,000,000"]
+      ];
+
+      const data = type === "HCM" ? dataHCM : dataHPH;
+      const table = document.getElementById("data-table");
+      const rows = data.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+      table.innerHTML = `<tr>
+        <th>Charge Name</th><th>Charge Name En</th><th>Is Must</th><th>Per CNTR / Per BILL</th><th>20GP</th><th>40GP</th><th>40HQ</th>
+      </tr>${rows}`;
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("table-view").style.display = "block";
+      document.getElementById("table-title").innerText = "Tariff Vietnam ("+type+")";
+    }
+
+    async function handleUpload() {
+      const input = document.getElementById("fileInput");
       const status = document.getElementById("uploadStatus");
-    
-      if (!fileInput.files.length) {
-        status.innerText = "❌ Vui lòng chọn file để upload!";
+      if (!input.files.length) {
+        status.innerText = "❌ Chọn file trước khi upload";
         return;
       }
-    
-      const file = fileInput.files[0];
-      status.innerText = "⏳ Đang tải lên Google Drive...";
-    
-      try {
-        // Bước 1: yêu cầu quyền truy cập (bạn cần tạo OAuth token từ Google Cloud Console)
-        const CLIENT_ID = '134590988797-7qf4vfh3fki27s0v6i484o4e2c7enjd.apps.googleusercontent.com';
-    
-        // Bước 2: Gửi file lên Drive
-        const metadata = {
-          name: file.name,
-          mimeType: file.type || "application/octet-stream"
-        };
-    
-        const form = new FormData();
-        form.append(
-          "metadata",
-          new Blob([JSON.stringify(metadata)], { type: "application/json" })
-        );
-        form.append("file", file);
-    
-        const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-          method: "POST",
-          headers: new Headers({ Authorization: "Bearer " + accessToken }),
-          body: form
-        });
-    
-        const data = await res.json();
-        if (res.ok) {
-          status.innerHTML = `✅ Upload thành công! File ID: <b>${data.id}</b>`;
-        } else {
-          status.innerText = "❌ Lỗi upload: " + (data.error?.message || "Không rõ nguyên nhân");
-        }
-      } catch (err) {
-        status.innerText = "❌ Lỗi kết nối: " + err.message;
+      if (!accessToken) {
+        tokenClient.requestAccessToken();
+        status.innerText = "🔑 Đang xác thực...";
+        setTimeout(handleUpload, 2000);
+        return;
       }
-    }
-      const info = contents[type];
-      document.getElementById("doc-title").style.display = "none";
-      document.getElementById("doc-grid").style.display = "none";
-      document.getElementById("template-view").style.display = "none";
-      document.getElementById("request-view").style.display = "none";
-      document.getElementById("info-view").style.display = "block";
-
-      document.querySelector("#info-title span").innerHTML = info.title;
-      document.getElementById("info-content").innerHTML = info.content;
+      const file = input.files[0];
+      status.innerText = "⏳ Đang tải lên...";
+      const form = new FormData();
+      form.append("metadata", new Blob([JSON.stringify({ name: file.name, mimeType: file.type })], { type: "application/json" }));
+      form.append("file", file);
+      const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+        method: "POST",
+        headers: new Headers({ Authorization: "Bearer " + accessToken }),
+        body: form
+      });
+      const data = await res.json();
+      if (res.ok) {
+        status.innerHTML = `✅ Upload thành công! <a href="https://drive.google.com/file/d/${data.id}/view" target="_blank">Xem file</a>`;
+      } else {
+        status.innerText = "❌ Lỗi upload: " + data.error?.message;
+      }
     }
   </script>
 </body>
