@@ -457,7 +457,7 @@
       document.getElementById("template-view").style.display = "none";
       document.getElementById("request-view").style.display = "none";
       document.getElementById("info-view").style.display = "none";
-      document.getElementById("marketing-view").style.display = "none"; // Đã sửa: Thêm dòng này
+      document.getElementById("marketing-view").style.display = "none";
     }
   
     function showTemplate() {
@@ -540,7 +540,7 @@
         },
         policies: {
           title: "Hồ sơ Hoàn cược",
-          content: 'Hồ sơ hoàn cược:<br>Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).',
+          content: 'Hồ sơ hoàn cược:<br>Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>Đối với các lô hàng về HCM: bản scan công văn hoàn cước, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).',
         }
       };
   
@@ -549,15 +549,16 @@
       document.getElementById("doc-grid").style.display = "none";
       document.getElementById("template-view").style.display = "none";
       document.getElementById("request-view").style.display = "none";
-      document.getElementById("marketing-view").style.display = "none"; // Ẩn marketing view khi chuyển sang info view
+      document.getElementById("marketing-view").style.display = "none";
       document.getElementById("info-view").style.display = "block";
       document.querySelector("#info-title span").innerHTML = info.title;
       document.getElementById("info-content").innerHTML = info.content;
     }
     
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIgMrFG4AvO9Qwu5JjEmtsy6t5P8_U6aK_Nvy8e2H2eteKrouOzGsNGlKX4FYSu0N8/exec"; 
+    // ** THAY THẾ WEB APP URL NÀY BẰNG URL THỰC TẾ CỦA BẠN **
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIgMrFG4AvO9Qwu5JjEmtsy6t5P8_U6aK_Nvy8e2H2eteKrouOzGsNGlKX4FYSu0N8/exec";
     
-    // Preview uploaded marketing files
+    // Logic gửi dữ liệu lên Google Sheet
     document.getElementById('doneBtn').addEventListener('click', async function() {
       const hbl = document.getElementById('searchHBL').value.trim();
       const fileInput = document.getElementById('fileInput');
@@ -575,8 +576,7 @@
       
       status.innerHTML = "⏳ Đang gửi thông tin lên Google Sheet...";
     
-      // 1. Chuẩn bị dữ liệu để gửi (Form Data)
-      // Lưu ý: Dữ liệu này CHỈ chứa HBL và TÊN FILE, không chứa file binary
+      // 1. Chuẩn bị dữ liệu để gửi (HBL và Tên file)
       const formData = new FormData();
       formData.append('hbl', hbl);
       formData.append('fileName', file.name);
@@ -585,7 +585,7 @@
         // 2. Gửi yêu cầu POST đến Apps Script Web App
         const response = await fetch(WEB_APP_URL, {
           method: 'POST',
-          body: formData // Apps Script sẽ đọc dữ liệu từ body này
+          body: formData
         });
     
         const result = await response.text();
@@ -594,17 +594,17 @@
           // 3. Xử lý thành công
           status.innerHTML = `✅ Thông tin (HBL: ${hbl}, File: ${file.name}) đã được lưu vào **Google Sheet**.`;
           
-          // (Tùy chọn) Xóa form sau khi thành công
+          // Xóa form sau khi thành công
           document.getElementById('searchHBL').value = '';
           fileInput.value = ''; 
         } else {
-          // 4. Xử lý lỗi từ Apps Script
+          // 4. Xử lý lỗi từ Apps Script (bao gồm lỗi thiếu dữ liệu, lỗi tên sheet, v.v.)
           status.innerHTML = `❌ Lỗi ghi dữ liệu. Chi tiết lỗi: ${result}`;
         }
     
       } catch (error) {
         // 5. Xử lý lỗi mạng/kết nối
-        status.innerHTML = `❌ Lỗi kết nối với dịch vụ (Network Error).`;
+        status.innerHTML = `❌ Lỗi kết nối với dịch vụ (Network Error). Vui lòng kiểm tra lại URL Apps Script.`;
         console.error('Fetch error:', error);
       }
     });
