@@ -321,86 +321,16 @@
       font-size: 14px;
       color: #777;
     }
-  .modal {
-    display: none; /* Mặc định ẩn */
-    position: fixed;
-    z-index: 10; /* Đảm bảo nằm trên cùng */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.6); /* Nền mờ */
-  }
-  
-  .modal-content {
-    background-color: #fff;
-    margin: 15% auto; /* 15% từ trên xuống và căn giữa */
-    padding: 30px;
-    border-radius: 15px;
-    width: 80%;
-    max-width: 400px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  }
-  
-  .close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-  
-  .close-btn:hover,
-  .close-btn:focus {
-    color: #5c9ead;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  
-  .modal-content h3 {
-    color: #184d47;
-    margin-top: 0;
-    border-bottom: 2px solid #a8d0a2;
-    padding-bottom: 10px;
-  }
-  
-  .modal-content p {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-  
-  .modal-content p strong {
-    color: #5c9ead;
-  }
-  .modal-content {
-    background-color: #fff;
-    margin: 12% auto;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-    animation: popIn 0.3s ease;
-  }
-  
-  @keyframes popIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
     @media (max-width: 768px) { main { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <header><h1>Welcome, Sabina!</h1></header>
 
-    <div class="search-bar">
-      <input
-    type="text" id="hblSearchInput" placeholder="Tìm kiếm HBL để xem trạng thái..."
-    />
-      <button
-    id="hblSearchBtn">🔍</button>
-    </div>
+  <div class="search-bar">
+    <input type="text" placeholder="Search Forms & Templates..." />
+    <button>🔍</button>
+  </div>
 
   <nav>
     <button>Time Sheets</button>
@@ -511,20 +441,7 @@
       </div>
     </div>
   </div>
-  <div id="hblModal" class="modal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal()">&times;</span>
-      <h3>Trạng thái HBL</h3>
-      <div id="modalContentDetails">
-        <p><strong>HBL:</strong> <span id="modalHbl"></span></p>
-        <p><strong>Đã nhận TT LCC:</strong> <span id="modalLcc"></span></p>
-        <p><strong>Đã nhận cược:</strong> <span id="modalDeposit"></span></p>
-        <p><strong>Ngày cược:</strong> <span id="modalDepositDate"></span></p>
-        <p><strong>Ngày Hoàn:</strong> <span id="modalRefundDate"></span></p>
-      </div>
-      <div id="modalStatusMessage" style="color: #d9534f; font-weight: bold;"></div>
-    </div>
-  </div>
+
   <footer>© 2025 The Hub. All rights reserved.</footer>
 
   <script>
@@ -691,112 +608,6 @@
         console.error('Fetch error:', error);
       }
     });
-    
-    // Lấy tham chiếu đến các phần tử Modal và Input
-    const hblSearchInput = document.getElementById('hblSearchInput');
-    const hblSearchBtn = document.getElementById('hblSearchBtn');
-    const hblModal = document.getElementById('hblModal');
-    const modalHbl = document.getElementById('modalHbl');
-    const modalLcc = document.getElementById('modalLcc');
-    const modalDeposit = document.getElementById('modalDeposit');
-    const modalDepositDate = document.getElementById('modalDepositDate');
-    const modalRefundDate = document.getElementById('modalRefundDate');
-    const modalContentDetails = document.getElementById('modalContentDetails');
-    const modalStatusMessage = document.getElementById('modalStatusMessage');
-    
-    // Hàm đóng Modal
-    function closeModal() {
-      hblModal.style.display = "none";
-    }
-    
-    // Hàm mở Modal và hiển thị dữ liệu/thông báo lỗi
-    function showModal(data) {
-      modalContentDetails.style.display = 'none';
-      modalStatusMessage.style.display = 'none';
-      
-      if (data && data.found) {
-        // Hiển thị dữ liệu tìm thấy
-        modalHbl.textContent = data.hbl || 'N/A';
-        modalLcc.textContent = data.lcc_received || 'N/A';
-        modalDeposit.textContent = data.deposit_received || 'N/A';
-        modalDepositDate.textContent = data.deposit_date || 'N/A';
-        modalRefundDate.textContent = data.refund_date || 'N/A';
-        
-        modalContentDetails.style.display = 'block';
-        modalStatusMessage.style.display = 'none';
-      } else {
-        // Hiển thị thông báo không tìm thấy hoặc lỗi
-        modalStatusMessage.textContent = data.message || `❌ Không tìm thấy HBL: ${hblSearchInput.value.trim().toUpperCase()} hoặc có lỗi xảy ra.`;
-        modalStatusMessage.style.display = 'block';
-        modalContentDetails.style.display = 'none';
-      }
-      
-      hblModal.style.display = "block";
-    }
-    
-// ==== HBL SEARCH POPUP ====
-
-document.getElementById("hblSearchBtn").addEventListener("click", function () {
-  const hbl = document.getElementById("hblSearchInput").value.trim();
-
-  if (hbl === "") {
-    alert("Vui lòng nhập mã HBL để tra cứu!");
-    return;
-  }
-
-  // 👉 Giả lập dữ liệu trạng thái (có thể thay bằng API hoặc file JSON sau)
-  const mockData = {
-    "HBL001": {
-      lcc: "Đã nhận",
-      deposit: "Đã cược",
-      depositDate: "2025-10-20",
-      refundDate: "2025-10-25",
-    },
-    "HBL002": {
-      lcc: "Chưa nhận",
-      deposit: "Chưa cược",
-      depositDate: "-",
-      refundDate: "-",
-    },
-  };
-
-  const info = mockData[hbl.toUpperCase()] || null;
-
-  // 👉 Hiển thị popup
-  document.getElementById("modalHbl").textContent = hbl.toUpperCase();
-
-  if (info) {
-    document.getElementById("modalLcc").textContent = info.lcc;
-    document.getElementById("modalDeposit").textContent = info.deposit;
-    document.getElementById("modalDepositDate").textContent = info.depositDate;
-    document.getElementById("modalRefundDate").textContent = info.refundDate;
-    document.getElementById("modalStatusMessage").textContent = "";
-  } else {
-    document.getElementById("modalLcc").textContent = "-";
-    document.getElementById("modalDeposit").textContent = "-";
-    document.getElementById("modalDepositDate").textContent = "-";
-    document.getElementById("modalRefundDate").textContent = "-";
-    document.getElementById("modalStatusMessage").textContent =
-      "⚠️ Không tìm thấy thông tin HBL này trong hệ thống.";
-  }
-
-  const modal = document.getElementById("hblModal");
-  modal.style.display = "block";
-});
-
-// ==== Đóng popup ====
-function closeModal() {
-  document.getElementById("hblModal").style.display = "none";
-}
-
-// ==== Đóng khi bấm ra ngoài ====
-window.onclick = function (event) {
-  const modal = document.getElementById("hblModal");
-  if (event.target === modal) {
-    modal.style.display = "none";
-  }
-};
-
   </script>
 </body>
 </html>
