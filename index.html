@@ -638,6 +638,10 @@
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth(); // 0-11
         const currentDay = today.getDate();
+        
+        // Lấy thông tin ngày hiện tại (Thứ, Tháng, Năm)
+        // Chúng ta đang ở ngày 28/10/2025 (Thứ Ba)
+        // Lưu ý: Môi trường sandbox của tôi đang chạy ngày 28/10/2025
 
         // Thiết lập header: Hiển thị tên tháng/năm hiện tại
         const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
@@ -668,7 +672,7 @@
                     // Điền ngày vào ô
                     cell.innerHTML = date;
                     if (date === currentDay) {
-                        // Tô sáng ngày hôm nay (chỉ cần kiểm tra ngày, vì tháng/năm đã là hiện tại)
+                        // Tô sáng ngày hôm nay
                         cell.classList.add('today');
                     }
                     date++;
@@ -685,10 +689,8 @@
         }
     }
 
-    // Đảm bảo code chạy sau khi HTML được tải
+    // Đảm bảo code chạy sau khi HTML được tải HOÀN TOÀN
     document.addEventListener('DOMContentLoaded', generateCalendar);
-    // Lưu ý: Đã thay thế window.onload bằng document.addEventListener('DOMContentLoaded')
-    // vì window.onload chỉ cho phép một hàm duy nhất và có thể ghi đè logic khác.
   </script>
 </body>
 </html>
