@@ -573,7 +573,9 @@
       // Giả lập tiến trình upload
       status.innerHTML = "⏳ Đang tải file lên Google Drive...";
       setTimeout(() => {
-        status.innerHTML = `✅ File "${file.name}" đã được tải lên thành công cho HBL "${hbl}".`;
+        // Sửa: Thêm thông tin thư mục và email vào thông báo
+        const targetFolder = "Thư mục CVHC (hoangdan.xnk@gmail.com)";
+        status.innerHTML = `✅ File "${file.name}" đã được tải lên thành công và lưu vào **${targetFolder}** cho HBL "${hbl}".`;
       }, 2000);
     });
   </script>
