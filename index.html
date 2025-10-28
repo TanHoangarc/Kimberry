@@ -555,10 +555,13 @@
       document.getElementById("info-content").innerHTML = info.content;
     }
     
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIgMrFG4AvO9Qwu5JjEmtsy6t5P8_U6aK_Nvy8e2H2eteKrouOzGsNGlKX4FYSu0N8/exec"; 
+    
     // Preview uploaded marketing files
-    document.getElementById('doneBtn').addEventListener('click', function() {
+    document.getElementById('doneBtn').addEventListener('click', async function() {
       const hbl = document.getElementById('searchHBL').value.trim();
-      const file = document.getElementById('fileInput').files[0];
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
       const status = document.getElementById('uploadStatus');
     
       if (!hbl) {
@@ -569,14 +572,41 @@
         status.innerHTML = "⚠️ Vui lòng chọn file để tải lên.";
         return;
       }
+      
+      status.innerHTML = "⏳ Đang gửi thông tin lên Google Sheet...";
     
-      // Giả lập tiến trình upload
-      status.innerHTML = "⏳ Đang tải file lên Google Drive...";
-      setTimeout(() => {
-        // Sửa: Thêm thông tin thư mục và email vào thông báo
-        const targetFolder = "Thư mục CVHC (hoangdan.xnk@gmail.com)";
-        status.innerHTML = `✅ File "${file.name}" đã được tải lên thành công và lưu vào **${targetFolder}** cho HBL "${hbl}".`;
-      }, 2000);
+      // 1. Chuẩn bị dữ liệu để gửi (Form Data)
+      // Lưu ý: Dữ liệu này CHỈ chứa HBL và TÊN FILE, không chứa file binary
+      const formData = new FormData();
+      formData.append('hbl', hbl);
+      formData.append('fileName', file.name);
+    
+      try {
+        // 2. Gửi yêu cầu POST đến Apps Script Web App
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: formData // Apps Script sẽ đọc dữ liệu từ body này
+        });
+    
+        const result = await response.text();
+    
+        if (result.includes("SUCCESS")) {
+          // 3. Xử lý thành công
+          status.innerHTML = `✅ Thông tin (HBL: ${hbl}, File: ${file.name}) đã được lưu vào **Google Sheet**.`;
+          
+          // (Tùy chọn) Xóa form sau khi thành công
+          document.getElementById('searchHBL').value = '';
+          fileInput.value = ''; 
+        } else {
+          // 4. Xử lý lỗi từ Apps Script
+          status.innerHTML = `❌ Lỗi ghi dữ liệu. Chi tiết lỗi: ${result}`;
+        }
+    
+      } catch (error) {
+        // 5. Xử lý lỗi mạng/kết nối
+        status.innerHTML = `❌ Lỗi kết nối với dịch vụ (Network Error).`;
+        console.error('Fetch error:', error);
+      }
     });
   </script>
 </body>
