@@ -321,24 +321,24 @@
       <h2 id="doc-title">Documents</h2>
 
       <div class="doc-grid" id="doc-grid">
-        <div class="doc-item" onclick="showRequestForms()">Request Forms</div>
-        <div class="doc-item" onclick="showSection('applications')">Applications</div>
-        <div class="doc-item" onclick="showTemplate()">Templates</div>
-        <div class="doc-item" onclick="showSection('projects')">Projects</div>
-        <div class="doc-item" onclick="showSection('handbook')">Employee Handbook</div>
-        <div class="doc-item" onclick="showSection('policies')">Policies & Procedures</div>
+        <div class="doc-item" onclick="showRequestForms()">Tariff Vietnam</div>
+        <div class="doc-item" onclick="showSection('applications')">Hướng dẫn</div>
+        <div class="doc-item" onclick="showTemplate()">File mẫu CVHC</div>
+        <div class="doc-item" onclick="showSection('projects')">Quy định Cược</div>
+        <div class="doc-item" onclick="showSection('handbook')">Tài khoản Kimberry</div>
+        <div class="doc-item" onclick="showSection('policies')">Hồ sơ Hoàn cược</div>
         <div class="doc-item">Marketing Collateral</div>
         <div class="doc-item">SOPs</div>
       </div>
 
       <div id="template-view" style="display:none;">
-        <h2>Templates <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
+        <h2>File mẫu CVHC<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
         <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
         <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
       </div>
 
       <div id="request-view" style="display:none;">
-        <h2>Request Forms <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
+        <h2>Tariff Việt Nam<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
         <div class="form-btns">
           <button onclick="showTable('HCM')">HCM</button>
           <button onclick="showTable('HPH')">HPH</button>
@@ -476,26 +476,26 @@
     function showSection(type) {
       const contents = {
         applications: {
-          title: "Applications",
+          title: "Hướng dẫn Hàng nhập",
           content: `1. Mọi yêu cầu liên quan đến hàng nhập, khách hàng vui lòng reply all email gửi thông báo hàng đến của KML và không bỏ bất kỳ email nào của KML khỏi email đang làm việc để đảm bảo yêu cầu của khách hàng được gửi đến nhân viên phụ trách.<br><br>
           2. Kimberry sử dụng lệnh giấy đối với hàng nhập về HPH, EDO đối với hàng nhập về HCM.`
         },
         projects: {
-          title: "Projects",
+          title: "Quy định Cược cont",
           content: `Mức cược container:<br>
           Đối với hàng nhập về HPH: 3,000,000VND/6,000,000VND per 20GP/40HQ.<br>
           Đối với hàng nhập về HCM: 1,000,000VND/2,000,000VND per 20GP/40HQ.<br>
           Với các lô hàng miễn cược, KML sẽ thông báo trực tiếp trên email gửi AN.`
         },
         handbook: {
-          title: "Employee Handbook",
+          title: "Thông tin tài khoản Kimberry",
           content: `Tài khoản nhận cược, tài khoản nhận thanh toán LCC như dưới đây, khách hàng vui lòng tách riêng LCC và cược container, khách hàng chỉ thanh toán theo tài khoản này và không thanh toán theo tài khoản trên hóa đơn.<br><br>
           <b>Company Name:</b> CÔNG TY TNHH TIẾP VẬN VÀ VẬN TẢI QUỐC TẾ LONG HOÀNG<br>
           <b>Account NO.:</b> 345673979999<br>
           <b>Bank:</b> MB BANK CHI NHÁNH HCM`
         },
         policies: {
-          title: "Policies & Procedures",
+          title: "Hồ sơ Hoàn cược",
           content: `Hồ sơ hoàn cược:<br>
           Đối với hàng nhập về HP: phơi phiếu nâng hạ bản gốc, công văn hoàn cược, UNC cược cont. Khách hàng gửi toàn bộ hồ sơ về địa chỉ văn phòng của KML Hải Phòng như dưới chữ ký email này.<br><br>
           Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).`
