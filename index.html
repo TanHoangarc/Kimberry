@@ -357,26 +357,16 @@
     </section>
     
     <div id="marketing-view" style="display:none;">
-      <h2>Marketing Collateral 
+      <h2>Marketing Collateral
         <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
       </h2>
     
-      <div class="search-bar" style="max-width: 400px; margin: 20px 0;">
-        <input type="text" id="searchHBL" placeholder="Nhập HBL" />
-        <button onclick="searchHBL()">🔍</button>
+      <div class="content-box">
+        <p>Upload tài liệu Marketing, ảnh hoặc file PDF để lưu trên Google Drive.</p>
+        <input type="file" id="fileInput" />
+        <button class="download-btn" onclick="uploadToDrive()">⬆ Hoàn thành / Upload</button>
+        <p id="uploadStatus"></p>
       </div>
-    
-      <div class="form-btns">
-        <button onclick="loadLocalFile()">📂 Load File</button>
-        <button onclick="completeUpload()">✅ Hoàn thành</button>
-      </div>
-    
-      <div class="content-box" id="marketing-content" style="margin-top:20px;">
-        <p><i>Vui lòng chọn file để tải lên hoặc tìm kiếm theo HBL.</i></p>
-      </div>
-    
-      <!-- input file ẩn -->
-      <input type="file" id="fileInput" style="display:none;" />
     </div>
 
     <section class="calendar">
@@ -524,70 +514,58 @@
           Đối với các lô hàng về HCM: bản scan công văn hoàn cược, bản scan phiếu nâng/hạ, UNC cược, gửi về địa chỉ email: <b>doc_hph@kimberryline.com</b> và <b>fin_vn@kimberryline.com</b> (không yêu cầu bản gốc công văn hoàn cược).`
         }
       };
-function showMarketing() {
-  // Ẩn các phần khác
-  document.getElementById("doc-title").style.display = "none";
-  document.getElementById("doc-grid").style.display = "none";
-  document.getElementById("template-view").style.display = "none";
-  document.getElementById("request-view").style.display = "none";
-  document.getElementById("info-view").style.display = "none";
-  
-  // Hiện phần Marketing
-  document.getElementById("marketing-view").style.display = "block";
-  document.getElementById("marketing-content").innerHTML = "<p><i>Vui lòng chọn file để tải lên hoặc tìm kiếm theo HBL.</i></p>";
-}
-
-    // Xử lý Load file từ máy tính
-    function loadLocalFile() {
-      const input = document.getElementById("fileInput");
-      input.click();
+      
+    function showMarketing() {
+      document.getElementById("doc-title").style.display = "none";
+      document.getElementById("doc-grid").style.display = "none";
+      document.getElementById("marketing-view").style.display = "block";
+    }
     
-      input.onchange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-          document.getElementById("marketing-content").innerHTML = `
-            <p><b>Đã chọn file:</b> ${file.name} (${(file.size / 1024).toFixed(1)} KB)</p>
-          `;
-          // Lưu file tạm thời vào biến global (nếu cần upload)
-          window.selectedFile = file;
+    async function uploadToDrive() {
+      const fileInput = document.getElementById("fileInput");
+      const status = document.getElementById("uploadStatus");
+    
+      if (!fileInput.files.length) {
+        status.innerText = "❌ Vui lòng chọn file để upload!";
+        return;
+      }
+    
+      const file = fileInput.files[0];
+      status.innerText = "⏳ Đang tải lên Google Drive...";
+    
+      try {
+        // Bước 1: yêu cầu quyền truy cập (bạn cần tạo OAuth token từ Google Cloud Console)
+        const accessToken = "YOUR_ACCESS_TOKEN"; // 👉 thay bằng token thật
+    
+        // Bước 2: Gửi file lên Drive
+        const metadata = {
+          name: file.name,
+          mimeType: file.type || "application/octet-stream"
+        };
+    
+        const form = new FormData();
+        form.append(
+          "metadata",
+          new Blob([JSON.stringify(metadata)], { type: "application/json" })
+        );
+        form.append("file", file);
+    
+        const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+          method: "POST",
+          headers: new Headers({ Authorization: "Bearer " + accessToken }),
+          body: form
+        });
+    
+        const data = await res.json();
+        if (res.ok) {
+          status.innerHTML = `✅ Upload thành công! File ID: <b>${data.id}</b>`;
+        } else {
+          status.innerText = "❌ Lỗi upload: " + (data.error?.message || "Không rõ nguyên nhân");
         }
-      };
-    }
-
-    // Giả lập upload — cần API thật để upload lên Google Drive
-    function completeUpload() {
-      if (!window.selectedFile) {
-        alert("Vui lòng chọn file trước!");
-        return;
+      } catch (err) {
+        status.innerText = "❌ Lỗi kết nối: " + err.message;
       }
-    
-      // Gợi ý thực tế:
-      // 👉 Tại đây bạn có thể gọi Google Drive API (qua Apps Script / OAuth)
-      // hoặc dùng đường dẫn ổ đĩa cục bộ bằng Electron / Node.
-      // Ở đây tôi để tạm lời nhắc cho bạn:
-      alert(`File "${window.selectedFile.name}" đã sẵn sàng để upload lên Drive!`);
-    
-      // Reset lại sau khi hoàn thành
-      document.getElementById("marketing-content").innerHTML =
-        `<p>✅ Đã hoàn tất xử lý file: <b>${window.selectedFile.name}</b></p>`;
-      window.selectedFile = null;
     }
-    
-    // Xử lý tìm kiếm HBL (demo)
-    function searchHBL() {
-      const keyword = document.getElementById("searchHBL").value.trim();
-      if (keyword === "") {
-        alert("Vui lòng nhập HBL để tìm kiếm!");
-        return;
-      }
-    
-      // Ở đây chỉ demo tìm kiếm — bạn có thể thay bằng fetch API từ server
-      document.getElementById("marketing-content").innerHTML = `
-        <p>Kết quả tìm kiếm cho HBL: <b>${keyword}</b></p>
-        <p><i>Không tìm thấy file phù hợp trong hệ thống (demo).</i></p>
-      `;
-    }
-
       const info = contents[type];
       document.getElementById("doc-title").style.display = "none";
       document.getElementById("doc-grid").style.display = "none";
