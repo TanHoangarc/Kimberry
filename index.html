@@ -238,25 +238,6 @@
       color: white;
       padding: 8px; 
     }
-    /* CSS MỚI CHO LỊCH TỰ ĐỘNG */
-    .today {
-        background-color: #5c9ead !important;
-        color: white;
-        font-weight: bold;
-        border-radius: 50%; 
-    }
-    .calendar td {
-        padding: 8px;
-        border-radius: 50%;
-    }
-    .calendar td:not(:empty) {
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .calendar td:not(.today):hover {
-        background-color: #e0e0e0;
-    }
-    /* KẾT THÚC CSS LỊCH MỚI */
     #data-table {
       width: 100%;
       border-collapse: collapse;
@@ -340,6 +321,23 @@
       font-size: 14px;
       color: #777;
     }
+    .today {
+            background-color: #5c9ead !important;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%; /* Để làm cho ngày hôm nay nổi bật */
+        }
+        .calendar td {
+            padding: 8px;
+            border-radius: 50%;
+        }
+        .calendar td:not(:empty) {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .calendar td:not(.today):hover {
+            background-color: #e0e0e0;
+        }
     @media (max-width: 768px) { main { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -420,20 +418,20 @@
       </div>
     </section>
 
-        <section class="calendar">
-      <h2 id="calendar-header">Calendar</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>CN</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th>
-          </tr>
-        </thead>
-        <tbody id="calendar-body">
-                  </tbody>
-      </table>
-      <p><b>Sự kiện định kỳ:</b> Thứ Tư hàng tuần</p>
-    </section>
-      </main>
+    <section class="calendar">
+        <h2 id="calendar-header">Calendar</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>CN</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th>
+                </tr>
+            </thead>
+            <tbody id="calendar-body">
+                </tbody>
+        </table>
+        <p><b>Sự kiện định kỳ:</b> Thứ Tư hàng tuần</p>
+    </section>
+  </main>
 
   <div class="contacts">
     <div class="contact-card">
@@ -574,7 +572,67 @@
       document.querySelector("#info-title span").innerHTML = info.title;
       document.getElementById("info-content").innerHTML = info.content;
     }
-    
+    function generateCalendar() {
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth(); // 0-11
+        const currentDay = today.getDate();
+    
+        // Thiết lập header
+        document.getElementById("calendar-header").innerHTML = `Lịch ${currentMonth + 1}/${currentYear}`;
+    
+        // Lấy ngày đầu tiên của tháng
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0 (CN) - 6 (T7)
+        // Lấy số ngày trong tháng hiện tại
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+        const calendarBody = document.getElementById('calendar-body');
+        calendarBody.innerHTML = ''; // Xóa lịch cũ
+    
+        let date = 1;
+        for (let i = 0; i < 6; i++) { // Tối đa 6 hàng (tuần)
+            const row = document.createElement('tr');
+    
+            for (let j = 0; j < 7; j++) { // 7 cột (thứ)
+                const cell = document.createElement('td');
+                
+                if (i === 0 && j < firstDayOfMonth) {
+                    // Điền ô trống trước ngày 1
+                    cell.innerHTML = '';
+                } else if (date > daysInMonth) {
+                    // Điền ô trống sau khi hết ngày trong tháng
+                    cell.innerHTML = '';
+                } else {
+                    // Điền ngày vào ô
+                    cell.innerHTML = date;
+                    if (date === currentDay) {
+                        // Tô sáng ngày hôm nay
+                        cell.classList.add('today');
+                    }
+                    date++;
+                }
+                row.appendChild(cell);
+            }
+    
+            // Thoát nếu đã điền hết ngày
+            if (date > daysInMonth) {
+                calendarBody.appendChild(row);
+                break;
+            }
+            calendarBody.appendChild(row);
+        }
+    }
+    
+    // Gọi hàm khi trang tải xong
+    window.onload = function() {
+        // Gọi các hàm khởi tạo khác nếu có
+        // ...
+        
+        // Khởi tạo lịch
+        generateCalendar();
+        
+        // ... (Các hàm khác của bạn)
+    };
     // ** THAY THẾ WEB APP URL NÀY BẰNG URL THỰC TẾ CỦA BẠN **
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQ2-GDlxBHRAruq1HIHR49heXbrWlCQxJkniX1Z-SFnlSbXgUWiPQH_ifloFcDJREA/exec";
     
@@ -628,68 +686,6 @@
         console.error('Fetch error:', error);
       }
     });
-    
-    // --------------------------------------------------------------------------------------------------
-    // LOGIC MỚI CHO LỊCH TỰ ĐỘNG
-    // --------------------------------------------------------------------------------------------------
-    
-    function generateCalendar() {
-        const today = new Date();
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth(); // 0-11
-        const currentDay = today.getDate();
-
-        // Thiết lập header: Hiển thị tên tháng/năm hiện tại
-        const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
-        document.getElementById("calendar-header").innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
-
-        // Lấy ngày đầu tiên của tháng (0: Chủ Nhật, 1: Thứ Hai,...)
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); 
-        // Lấy số ngày trong tháng hiện tại
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-        const calendarBody = document.getElementById('calendar-body');
-        calendarBody.innerHTML = ''; // Xóa lịch cũ
-
-        let date = 1;
-        for (let i = 0; i < 6; i++) { // Tối đa 6 hàng (tuần)
-            const row = document.createElement('tr');
-
-            for (let j = 0; j < 7; j++) { // 7 cột (thứ)
-                const cell = document.createElement('td');
-                
-                if (i === 0 && j < firstDayOfMonth) {
-                    // Điền ô trống trước ngày 1
-                    cell.innerHTML = '';
-                } else if (date > daysInMonth) {
-                    // Điền ô trống sau khi hết ngày trong tháng
-                    cell.innerHTML = '';
-                } else {
-                    // Điền ngày vào ô
-                    cell.innerHTML = date;
-                    if (date === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-                        // Tô sáng ngày hôm nay
-                        cell.classList.add('today');
-                    }
-                    date++;
-                }
-                row.appendChild(cell);
-            }
-
-            // Thoát nếu đã điền hết ngày
-            if (date > daysInMonth) {
-                calendarBody.appendChild(row);
-                break;
-            }
-            calendarBody.appendChild(row);
-        }
-    }
-
-    // Gọi hàm khi trang tải xong
-    window.onload = function() {
-        // Khởi tạo lịch
-        generateCalendar();
-    };
   </script>
 </body>
 </html>
