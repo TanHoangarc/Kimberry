@@ -408,23 +408,25 @@
       const data = type === "HCM" ? dataHCM : dataHPH;
       const table = document.getElementById("data-table");
   
+      // 🧩 HTML cho bảng
       table.innerHTML = `
-        <tr>
-          <th>Charge Name</th>
-          <th>Charge Name En</th>
-          <th>Is Must</th>
-          <th>Per CNTR / Per BILL</th>
-          <th>20GP</th>
-          <th>40GP</th>
-          <th>40HQ</th>
-        </tr>
+        <thead>
+          <tr style="background-color:#5c9ead; color:white;">
+            <th>Charge Name</th>
+            <th>Charge Name En</th>
+            <th>Is Must</th>
+            <th>Per CNTR / Per BILL</th>
+            <th>20GP</th>
+            <th>40GP</th>
+            <th>40HQ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(row => `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`).join("")}
+        </tbody>
       `;
   
-      data.forEach(row => {
-        table.innerHTML += `<tr>${row.map(v => `<td>${v}</td>`).join("")}</tr>`;
-      });
-  
-      document.getElementById("table-title").innerText = type;
+      document.getElementById("table-title").innerText = `Tariff ${type}`;
       document.getElementById("form-table").style.display = "block";
     }
   
