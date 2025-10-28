@@ -24,7 +24,10 @@
     header::after {
       content: "";
       position: absolute;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background-color: rgba(0,0,0,0.5);
       z-index: 0;
     }
@@ -58,8 +61,9 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .search-bar button:hover { background: #4a8c99; }
-
+    .search-bar button:hover {
+      background: #4a8c99;
+    }
     nav {
       display: flex;
       justify-content: center;
@@ -82,7 +86,6 @@
       background: #5c9ead;
       color: white;
     }
-
     main {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -115,8 +118,9 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .back-btn:hover { background: #4a8c99; }
-
+    .back-btn:hover {
+      background: #4a8c99;
+    }
     .doc-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -137,7 +141,6 @@
       background: #5c9ead;
       color: white;
     }
-
     iframe {
       width: 100%;
       height: 600px;
@@ -145,7 +148,6 @@
       border: 1px solid #ccc;
       margin-top: 20px;
     }
-
     .download-btn {
       display: block;
       margin: 20px auto 0;
@@ -158,8 +160,9 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .download-btn:hover { background: #4a8c99; }
-
+    .download-btn:hover {
+      background: #4a8c99;
+    }
     .upload-section {
       background: #fff;
       padding: 20px;
@@ -167,21 +170,25 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 500px;
-      margin-top: 20px;
     }
-
-    .upload-section h3 { margin-bottom: 15px; color: #333; }
-
+    
+    .upload-section h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
     .hbl-search {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 15px;
     }
+    
     .hbl-search label {
       font-weight: 600;
       color: #333;
     }
+    
     .hbl-search input {
       flex: 1;
       padding: 6px 10px;
@@ -189,13 +196,17 @@
       border-radius: 6px;
       font-size: 14px;
     }
-
+    
     .upload-area {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .upload-area input[type="file"] { flex: 1; }
+    
+    .upload-area input[type="file"] {
+      flex: 1;
+    }
+    
     .upload-area button {
       background-color: #5C9EAD;
       color: white;
@@ -205,21 +216,28 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    .upload-area button:hover { background-color: #A8D0A2; }
-
-    #uploadStatus { margin-top: 10px; font-size: 13px; color: #333; }
-
-    .calendar { text-align: center; }
+    
+    .upload-area button:hover {
+      background-color: #A8D0A2;
+    }
+    
+    #uploadStatus {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #333;
+    }
+    .calendar {
+      text-align: center; 
+    } 
     .calendar table {
       width: 100%;
-      border-collapse: collapse;
-    }
-    .calendar th {
+      border-collapse: collapse; 
+    } 
+    .calendar th { 
       background: #5c9ead;
       color: white;
-      padding: 8px;
+      padding: 8px; 
     }
-
     #data-table {
       width: 100%;
       border-collapse: collapse;
@@ -231,9 +249,12 @@
       padding: 10px;
       text-align: center;
     }
-    #data-table tr:nth-child(even) { background-color: #f9f9f9; }
-    #data-table tr:hover { background-color: #f1f1f1; }
-
+    #data-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    #data-table tr:hover {
+      background-color: #f1f1f1;
+    }
     .form-btns {
       display: flex;
       justify-content: center;
@@ -249,10 +270,14 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    .form-btns button:hover { background: #5c9ead; color: white; }
-
-    .content-box { margin-top: 20px; line-height: 1.7; }
-
+    .form-btns button:hover {
+      background: #5c9ead;
+      color: white;
+    }
+    .content-box {
+      margin-top: 20px;
+      line-height: 1.7;
+    }
     .contacts {
       display: flex;
       justify-content: center;
@@ -279,214 +304,4 @@
       object-fit: cover;
       margin-bottom: 10px;
     }
-    .contact-card h3 { margin-bottom: 10px; color: #184d47; }
-    .contact-buttons button {
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      margin: 5px;
-      cursor: pointer;
-      font-size: 18px;
-      transition: 0.3s;
-    }
-    .contact-buttons button:hover { background: #a8d0a2; color: white; }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-      color: #777;
-    }
-    @media (max-width: 768px) { main { grid-template-columns: 1fr; } }
-  </style>
-</head>
-<body>
-  <header><h1>Welcome, Sabina!</h1></header>
-
-  <div class="search-bar">
-    <input type="text" placeholder="Search Forms & Templates..." />
-    <button>🔍</button>
-  </div>
-
-  <nav>
-    <button>Time Sheets</button>
-    <button>Time Off</button>
-    <button>Expenses</button>
-    <button>Holidays</button>
-    <button>Benefits</button>
-    <button>Directory</button>
-    <button>IT Helpdesk</button>
-    <button>Products</button>
-  </nav>
-
-  <main>
-    <section id="doc-section">
-      <h2 id="doc-title">Documents</h2>
-      <div class="doc-grid" id="doc-grid">
-        <div class="doc-item" onclick="showRequestForms()">Tariff Vietnam</div>
-        <div class="doc-item" onclick="showSection('applications')">Hướng dẫn</div>
-        <div class="doc-item" onclick="showSection('projects')">Quy định Cược</div>
-        <div class="doc-item" onclick="showSection('handbook')">Tài khoản Kimberry</div>
-        <div class="doc-item" onclick="showSection('policies')">Hồ sơ Hoàn cược</div>
-        <div class="doc-item" onclick="showTemplate()">File mẫu CVHC</div>
-        <div class="doc-item" onclick="showMarketing()">Marketing Collateral</div>
-        <div class="doc-item">SOPs</div>
-      </div>
-
-      <!-- Upload Marketing -->
-      <div id="marketing-view" style="display:none;">
-        <div class="upload-section">
-          <h3>Marketing Collateral</h3>
-          <div class="hbl-search">
-            <label for="searchHBL">Nhập HBL:</label>
-            <input type="text" id="searchHBL" placeholder="Nhập mã HBL..." />
-          </div>
-          <div class="upload-area">
-            <input type="file" id="fileInput" />
-            <button id="uploadBtn">Upload</button>
-            <button id="doneBtn">Hoàn thành</button>
-          </div>
-          <div id="uploadStatus"></div>
-        </div>
-      </div>
-
-      <div id="template-view" style="display:none;">
-        <h2>File mẫu CVHC<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
-        <button class="download-btn" onclick="downloadTemplate()">⬇ Tải xuống file</button>
-      </div>
-
-      <div id="request-view" style="display:none;">
-        <h2>Tariff Việt Nam<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <div class="form-btns">
-          <button onclick="showTable('HCM')">HCM</button>
-          <button onclick="showTable('HPH')">HPH</button>
-        </div>
-        <div id="form-table" style="display:none;">
-          <h3 id="table-title"></h3>
-          <table id="data-table"></table>
-          <button class="back-btn" style="margin-top:15px;" onclick="hideTable()">⬅ Quay lại Request Forms</button>
-        </div>
-      </div>
-
-      <div id="info-view" style="display:none;">
-        <h2 id="info-title"><span></span><button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
-        <div class="content-box" id="info-content"></div>
-      </div>
-    </section>
-
-    <section class="calendar">
-      <h2>Calendar</h2>
-      <table>
-        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
-        <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
-        <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
-        <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
-        <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
-        <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td></tr>
-      </table>
-      <p><b>Recurring Event:</b> Every Wednesday</p>
-    </section>
-  </main>
-
-  <div class="contacts">
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="avatar" />
-      <h3>Sabina - Admin</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0901 234 567')">📞</button>
-        <button onclick="window.open('https://zalo.me/0901234567','_blank')">💬</button>
-      </div>
-    </div>
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="avatar" />
-      <h3>David - Support</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0912 888 666')">📞</button>
-        <button onclick="window.open('https://zalo.me/0912888666','_blank')">💬</button>
-      </div>
-    </div>
-    <div class="contact-card">
-      <img src="https://randomuser.me/api/portraits/men/51.jpg" alt="avatar" />
-      <h3>Long - Operations</h3>
-      <div class="contact-buttons">
-        <button onclick="alert('📞 0933 777 222')">📞</button>
-        <button onclick="window.open('https://zalo.me/0933777222','_blank')">💬</button>
-      </div>
-    </div>
-  </div>
-
-  <footer>© 2025 The Hub. All rights reserved.</footer>
-  <script>
-  // Khi tài liệu sẵn sàng
-  document.addEventListener("DOMContentLoaded", () => {
-    const fileInput = document.getElementById("fileInput");
-    const uploadButton = document.getElementById("uploadButton");
-    const uploadStatus = document.getElementById("uploadStatus");
-    const monthFilter = document.getElementById("monthFilter");
-    const tableBody = document.querySelector("#fileTable tbody");
-    const cards = document.querySelectorAll(".card");
-    const sections = document.querySelectorAll(".section");
-
-    // Chuyển đổi giữa các tab
-    cards.forEach(card => {
-      card.addEventListener("click", () => {
-        const section = card.dataset.section;
-        sections.forEach(sec => sec.style.display = "none");
-        document.getElementById(section).style.display = "block";
-      });
-    });
-
-    // Sự kiện upload file
-    uploadButton.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        uploadStatus.textContent = "⚠️ Vui lòng chọn file trước.";
-        uploadStatus.style.color = "#d9534f";
-        return;
-      }
-
-      uploadStatus.textContent = "⏳ Đang tải lên...";
-      uploadStatus.style.color = "#333";
-
-      // Giả lập upload (thay bằng API thật khi có backend)
-      setTimeout(() => {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        addFileRow(file.name, currentMonth, "Hoàn tất");
-        uploadStatus.textContent = "✅ Tải lên thành công!";
-        uploadStatus.style.color = "#28a745";
-        fileInput.value = "";
-      }, 1500);
-    });
-
-    // Thêm file vào bảng
-    function addFileRow(name, month, status) {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${name}</td>
-        <td>${month}</td>
-        <td>${status}</td>
-      `;
-      tableBody.appendChild(row);
-    }
-
-    // Lọc file theo tháng
-    monthFilter.addEventListener("change", () => {
-      const selectedMonth = monthFilter.value;
-      const rows = tableBody.querySelectorAll("tr");
-      rows.forEach(row => {
-        const month = row.cells[1].textContent;
-        row.style.display = (selectedMonth === "" || month === selectedMonth) ? "" : "none";
-      });
-    });
-
-    // Hiệu ứng hover nhẹ
-    document.querySelectorAll(".card").forEach(card => {
-      card.addEventListener("mouseenter", () => card.style.transform = "scale(1.05)");
-      card.addEventListener("mouseleave", () => card.style.transform = "scale(1)");
-    });
-  });
-</script>
-
-</body>
-</html>
+    .contact-card h3 { margin-bottom: 10px; color: #
