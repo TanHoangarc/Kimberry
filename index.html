@@ -353,7 +353,7 @@
         <div class="doc-item" onclick="showSection('handbook')">Tài khoản Kimberry</div>
         <div class="doc-item" onclick="showSection('policies')">Hồ sơ Hoàn cược</div>
         <div class="doc-item" onclick="showTemplate()">File mẫu CVHC</div>
-        <div class="doc-item" onclick="showMarketing()">Marketing Collateral</div>
+        <div class="doc-item" onclick="showMarketing()">Tra cứu Job</div>
         <div class="doc-item">SOPs</div>
       </div>
 
@@ -582,14 +582,13 @@
         // Hiển thị kết quả dạng bảng
         resultArea.innerHTML = `
           <table style="width:100%;border-collapse:collapse;margin-top:10px;">
-            <tr><th style="border:1px solid #ccc;padding:6px;">Thuộc tính</th><th style="border:1px solid #ccc;padding:6px;">Giá trị</th></tr>
-            <tr><td>Thang</td><td>${result.Thang}</td></tr>
-            <tr><td>Ma</td><td>${result.Ma}</td></tr>
-            <tr><td>MaKH</td><td>${result.MaKH}</td></tr>
-            <tr><td>SoTien</td><td>${result.SoTien}</td></tr>
-            <tr><td>TrangThai</td><td>${result.TrangThai}</td></tr>
-            <tr><td>NoiDung1</td><td>${result.NoiDung1}</td></tr>
-            <tr><td>NoiDung2</td><td>${result.NoiDung2}</td></tr>
+            <tr><td>Month</td><td>${result.Thang}</td></tr>
+            <tr><td>Job</td><td>${result.Ma}</td></tr>
+            <tr><td>Tiền Lcc</td><td>${result.MaKH}</td></tr>
+            <tr><td>Tiền cược</td><td>${result.SoTien}</td></tr>
+            <tr><td>Nhận thanh toán lcc</td><td>${result.TrangThai}</td></tr>
+            <tr><td>Nhận Cược</td><td>${result.NoiDung1}</td></tr>
+            <tr><td>Hoàn Cược</td><td>${result.NoiDung2}</td></tr>
           </table>
         `;
       } catch (err) {
