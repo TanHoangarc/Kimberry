@@ -358,24 +358,22 @@
       </div>
 
       <div id="marketing-view" style="display:none;">
-        <h2 id="marketing-title">Marketing Collateral<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
+        <h2 id="marketing-title">Marketing Collateral
+          <button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button>
+        </h2>
         <div class="upload-section">
-          <h3>Marketing Collateral</h3>
-        
+          <h3>Tra cứu HBL</h3>
+      
           <div class="hbl-search">
             <label for="searchHBL">Nhập HBL:</label>
             <input type="text" id="searchHBL" placeholder="Nhập mã HBL..." />
+            <button id="searchBtn">🔍 Tra cứu</button>
           </div>
-        
-          <div class="upload-area">
-            <input type="file" id="fileInput" />
-            <button id="uploadBtn">Upload</button>
-            <button id="doneBtn">Hoàn thành</button>
-          </div>
-        
-          <div id="uploadStatus"></div>
+      
+          <div id="resultArea" style="margin-top:15px;"></div>
         </div>
       </div>
+      
       <div id="template-view" style="display:none;">
         <h2>File mẫu CVHC<button class="back-btn" onclick="backToDocuments()">⬅ Quay lại</button></h2>
         <iframe src="https://docs.google.com/document/d/1gKMJ2esew1PFhHRX8UedmxEGZhVxN-fh/preview"></iframe>
@@ -555,57 +553,48 @@
       document.getElementById("info-content").innerHTML = info.content;
     }
     
-    // ** THAY THẾ WEB APP URL NÀY BẰNG URL THỰC TẾ CỦA BẠN **
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQ2-GDlxBHRAruq1HIHR49heXbrWlCQxJkniX1Z-SFnlSbXgUWiPQH_ifloFcDJREA/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxk6Gw3BlWnhFay3Zacc_NC9ntebz_lELseV0eXocXtS59xUeK781b-B8ZnQ-sT0Oay/exec";
     
-    // Logic gửi dữ liệu lên Google Sheet
-    document.getElementById('doneBtn').addEventListener('click', async function() {
+    document.getElementById('searchBtn').addEventListener('click', async () => {
       const hbl = document.getElementById('searchHBL').value.trim();
-      const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
-      const status = document.getElementById('uploadStatus');
+      const resultArea = document.getElementById('resultArea');
+      resultArea.innerHTML = '';
     
       if (!hbl) {
-        status.innerHTML = "⚠️ Vui lòng nhập HBL trước khi tải lên.";
+        resultArea.innerHTML = "⚠️ Vui lòng nhập HBL cần tra cứu.";
         return;
       }
-      if (!file) {
-        status.innerHTML = "⚠️ Vui lòng chọn file để tải lên.";
-        return;
-      }
-      
-      status.innerHTML = "⏳ Đang gửi thông tin lên Google Sheet...";
     
-      // 1. Chuẩn bị dữ liệu để gửi (HBL và Tên file)
-      const formData = new FormData();
-      formData.append('hbl', hbl);
-      formData.append('fileName', file.name);
+      resultArea.innerHTML = "⏳ Đang tìm kiếm...";
     
       try {
-        // 2. Gửi yêu cầu POST đến Apps Script Web App
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: formData
-        });
+        const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(hbl)}`);
+        const data = await response.json();
     
-        const result = await response.text();
-    
-        if (result.includes("SUCCESS")) {
-          // 3. Xử lý thành công
-          status.innerHTML = `✅ Thông tin (HBL: ${hbl}, File: ${file.name}) đã được lưu vào **Google Sheet**.`;
-          
-          // Xóa form sau khi thành công
-          document.getElementById('searchHBL').value = '';
-          fileInput.value = ''; 
-        } else {
-          // 4. Xử lý lỗi từ Apps Script (bao gồm lỗi thiếu dữ liệu, lỗi tên sheet, v.v.)
-          status.innerHTML = `❌ Lỗi ghi dữ liệu. Chi tiết lỗi: ${result}`;
+        if (data.error) {
+          resultArea.innerHTML = `❌ ${data.error}`;
+          return;
         }
     
-      } catch (error) {
-        // 5. Xử lý lỗi mạng/kết nối
-        status.innerHTML = `❌ Lỗi kết nối với dịch vụ (Network Error). Vui lòng kiểm tra lại URL Apps Script.`;
-        console.error('Fetch error:', error);
+        // Nếu trả về nhiều kết quả (mảng)
+        const result = Array.isArray(data) ? data[0] : data;
+    
+        // Hiển thị kết quả dạng bảng
+        resultArea.innerHTML = `
+          <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+            <tr><th style="border:1px solid #ccc;padding:6px;">Thuộc tính</th><th style="border:1px solid #ccc;padding:6px;">Giá trị</th></tr>
+            <tr><td>Thang</td><td>${result.Thang}</td></tr>
+            <tr><td>Ma</td><td>${result.Ma}</td></tr>
+            <tr><td>MaKH</td><td>${result.MaKH}</td></tr>
+            <tr><td>SoTien</td><td>${result.SoTien}</td></tr>
+            <tr><td>TrangThai</td><td>${result.TrangThai}</td></tr>
+            <tr><td>NoiDung1</td><td>${result.NoiDung1}</td></tr>
+            <tr><td>NoiDung2</td><td>${result.NoiDung2}</td></tr>
+          </table>
+        `;
+      } catch (err) {
+        console.error(err);
+        resultArea.innerHTML = "❌ Lỗi kết nối hoặc dữ liệu.";
       }
     });
   </script>
