@@ -140,51 +140,103 @@
         background: #4a8c99;
       }
       /* 📅 Calendar style */
-      #calendar {
-        text-align: center;
+      .calendar-modern {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 360px;
+        padding: 20px;
+        font-family: "Segoe UI", sans-serif;
+        color: #333;
       }
-      #calendar-header {
+
+      .calendar-header {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
       }
-      #calendar-header button {
-        background: #5c9ead;
-        color: #fff;
+
+      .calendar-header select {
         border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        background: #f4f4f4;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 15px;
+        outline: none;
         cursor: pointer;
       }
-      #calendar-header button:hover {
-        background: #4a8c99;
-      }
-      table.calendar-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      table.calendar-table th:first-child,
-      table.calendar-table td:first-child {
-        background-color: #d4d4d4; /* màu đỏ nhạt cho CN */
-        color: #184d47;
-      }
-      table.calendar-table th {
-        background: #a8d0a2;
-        color: #184d47;
-        padding: 6px;
-      }
-      table.calendar-table td {
-        padding: 8px;
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
         text-align: center;
-        border: 1px solid #ddd;
-        cursor: default;
+        gap: 8px;
       }
-      table.calendar-table td.today {
-        background: #5c9ead;
-        color: white;
+      /* 📝 Phần ghi chú */
+      .calendar-notes {
+        margin-top: 10px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+      }
+
+      .calendar-notes h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .calendar-notes textarea {
+        width: 100%;
+        height: 80px;
+        resize: none;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        background: #f9f9f9;
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      .calendar-notes textarea:focus {
+        border-color: #5c9ead;
+        background: #fff;
+      }
+      .day-name {
+        font-weight: 600;
+        color: #888;
+        font-size: 13px;
+      }
+
+      .day {
+        padding: 10px 0;
         border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+
+      .day:hover {
+        background: #a8d0a2;
+        color: white;
+      }
+
+      .day.today {
+        background: #5c9ead;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      .day.inactive {
+        color: #ccc;
+      }
+
+      .day-name:first-child,
+      .day:nth-child(7n + 1) {
+        color: #d9534f; /* Chủ Nhật màu đỏ */
       }
       .contacts {
         display: flex;
@@ -230,6 +282,33 @@
       .contact-buttons button:hover {
         background: #a8d0a2;
         color: white;
+      }
+      /* Ghi chú cố định */
+      .weekly-notes {
+        margin-top: 20px;
+        text-align: left;
+        background: #f9f9f9;
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid #eee;
+      }
+
+      .weekly-notes h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .weekly-notes ul {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 14px;
+        color: #444;
+      }
+
+      .weekly-notes li {
+        margin-bottom: 4px;
       }
     </style>
   </head>
@@ -301,10 +380,33 @@
         <div id="dynamic-content" style="display: none"></div>
       </section>
       <!-- 📅 Calendar Section -->
-      <section id="calendar-section">
-        <h2>Calendar</h2>
-        <div id="calendar"></div>
-      </section>
+      <div class="calendar-modern">
+        <div class="calendar-header">
+          <select id="monthSelect"></select>
+          <select id="yearSelect"></select>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+          <div class="day-name">CN</div>
+          <div class="day-name">T2</div>
+          <div class="day-name">T3</div>
+          <div class="day-name">T4</div>
+          <div class="day-name">T5</div>
+          <div class="day-name">T6</div>
+          <div class="day-name">T7</div>
+          <!-- các ô ngày sẽ được JS thêm trực tiếp vào đây -->
+        </div>
+        <div class="weekly-notes">
+          <h3 style="color: coral">🗒️ Thông báo</h3>
+          <ul>
+            <li>Lịch làm việc của Kimberry từ T2-T6, sáng T7 hàng tuần.</li>
+            <li>
+              Thông báo nghỉ Tết.<br />
+              - Thời gian nghỉ: <b>14/02/2026</b> (Dương lịch).<br />
+              - Thời làm lại: <b>23/02/2026</b> (Dương lịch)
+            </li>
+          </ul>
+        </div>
+      </div>
     </main>
     <div class="contacts">
       <div class="contact-card">
@@ -419,8 +521,12 @@
             <table style="width:100%;border-collapse:collapse;margin-top:10px;">
               <tr><td>Tháng</td><td>${result.Thang || "-"}</td></tr>
               <tr><td>Mã Job</td><td>${result.Ma || "-"}</td></tr>
-              <tr><td>Local Charge</td><td>${result.MaKH || "-"}</td></tr>
-              <tr><td>Tiền Cược</td><td>${result.SoTien || "-"}</td></tr>
+              <tr><td>Local Charge</td><td>${
+                result.MaKH ? result.MaKH.toLocaleString("vi-VN") : "-"
+              }</td></tr>
+              <tr><td>Tiền Cược</td><td>${
+                result.SoTien ? result.SoTien.toLocaleString("vi-VN") : "-"
+              }</td></tr>
               <tr><td>Nhận Lcc</td><td>${result.TrangThai || "-"}</td></tr>
               <tr><td>Nhận Cược</td><td>${result.NoiDung1 || "-"}</td></tr>
               <tr><td>Hoàn cược</td><td>${result.NoiDung2 || "-"}</td></tr>
@@ -551,58 +657,104 @@
         document.getElementById("form-table").innerHTML = html;
       }
       /* ========== Tạo lịch động ========== */
-      function generateCalendar(month, year) {
-        const calendar = document.getElementById("calendar");
-        const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
+      const monthSelect = document.getElementById("monthSelect");
+      const yearSelect = document.getElementById("yearSelect");
+      const calendarGrid = document.getElementById("calendarGrid");
+
+      const monthsVN = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
+      ];
+
+      function initCalendar() {
+        const now = new Date();
+        for (let i = 0; i < 12; i++) {
+          const option = document.createElement("option");
+          option.value = i;
+          option.textContent = monthsVN[i];
+          if (i === now.getMonth()) option.selected = true;
+          monthSelect.appendChild(option);
+        }
+
+        const thisYear = now.getFullYear();
+        for (let y = thisYear - 3; y <= thisYear + 3; y++) {
+          const option = document.createElement("option");
+          option.value = y;
+          option.textContent = y;
+          if (y === thisYear) option.selected = true;
+          yearSelect.appendChild(option);
+        }
+
+        renderCalendar(thisYear, now.getMonth());
+      }
+
+      function renderCalendar(year, month) {
+        // xóa toàn bộ ngày cũ, chỉ giữ lại 7 ô tiêu đề (CN–T7)
+        const headerCount = 7;
+        while (calendarGrid.children.length > headerCount) {
+          calendarGrid.removeChild(calendarGrid.lastChild);
+        }
+
+        const firstDay = new Date(year, month, 1).getDay(); // CN=0
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const prevMonthDays = new Date(year, month, 0).getDate();
+
         const today = new Date();
 
-        let html = `
-          <div id="calendar-header">
-            <button onclick="changeMonth(-1)">‹</button>
-            <div><b>${firstDay.toLocaleString("vi-VN", {
-              month: "long",
-              year: "numeric",
-            })}</b></div>
-            <button onclick="changeMonth(1)">›</button>
-          </div>
-          <table class="calendar-table">
-            <tr>${daysOfWeek.map((d) => `<th>${d}</th>`).join("")}</tr><tr>
-        `;
+        // thêm ngày tháng trước (ẩn mờ)
+        for (let i = firstDay - 1; i >= 0; i--) {
+          const div = document.createElement("div");
+          div.classList.add("day", "inactive");
+          div.textContent = prevMonthDays - i;
+          calendarGrid.appendChild(div);
+        }
 
-        let dayOfWeek = firstDay.getDay();
-        for (let i = 0; i < dayOfWeek; i++) html += "<td></td>";
+        // thêm ngày tháng hiện tại
+        for (let d = 1; d <= daysInMonth; d++) {
+          const div = document.createElement("div");
+          div.classList.add("day");
+          div.textContent = d;
 
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-          const isToday =
-            day === today.getDate() &&
+          if (
+            d === today.getDate() &&
             month === today.getMonth() &&
-            year === today.getFullYear();
-          html += `<td class="${isToday ? "today" : ""}">${day}</td>`;
-          if ((day + dayOfWeek) % 7 === 0) html += "</tr><tr>";
+            year === today.getFullYear()
+          ) {
+            div.classList.add("today");
+          }
+
+          calendarGrid.appendChild(div);
         }
 
-        html += "</tr></table>";
-        calendar.innerHTML = html;
-      }
-
-      let currentMonth = new Date().getMonth();
-      let currentYear = new Date().getFullYear();
-
-      function changeMonth(offset) {
-        currentMonth += offset;
-        if (currentMonth < 0) {
-          currentMonth = 11;
-          currentYear--;
-        } else if (currentMonth > 11) {
-          currentMonth = 0;
-          currentYear++;
+        // thêm phần dư (ngày tháng sau)
+        const totalCells = firstDay + daysInMonth;
+        const remaining = 42 - totalCells;
+        for (let d = 1; d <= remaining; d++) {
+          const div = document.createElement("div");
+          div.classList.add("day", "inactive");
+          div.textContent = d;
+          calendarGrid.appendChild(div);
         }
-        generateCalendar(currentMonth, currentYear);
       }
 
-      generateCalendar(currentMonth, currentYear);
+      monthSelect.addEventListener("change", () =>
+        renderCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value))
+      );
+      yearSelect.addEventListener("change", () =>
+        renderCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value))
+      );
+
+      initCalendar();
     </script>
   </body>
 </html>
