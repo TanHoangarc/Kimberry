@@ -34,6 +34,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [completingEntryId, setCompletingEntryId] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uncFileRef = useRef<HTMLInputElement>(null);
@@ -54,6 +55,17 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 setMaLineOptions(JSON.parse(savedMaLines));
             } else {
                 setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
+            }
+
+            const userEmailRaw = localStorage.getItem('user');
+            const allUsersRaw = localStorage.getItem('users');
+            if (userEmailRaw && allUsersRaw) {
+              const loggedInUserEmail = JSON.parse(userEmailRaw).email;
+              const allUsers: User[] = JSON.parse(allUsersRaw);
+              const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
+              if (currentUser) {
+                setUserRole(currentUser.role);
+              }
             }
         } catch (error) {
             console.error("Failed to load data from localStorage", error);
@@ -153,7 +165,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
             setEntries(prev => [...prev, newEntry]);
             
-            // --- Create Notification ---
             const userRaw = localStorage.getItem('user');
             if (userRaw) {
                 const currentUser: Partial<User> = JSON.parse(userRaw);
@@ -163,7 +174,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                   details: `Mã Line: ${newEntry.maLine}`
                 });
             }
-            // -------------------------
 
             setFormData(initialFormData);
             setSelectedFile(null);
@@ -197,7 +207,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     const handleCompleteClick = (idToComplete: string) => {
         setCompletingEntryId(idToComplete);
         if (uncFileRef.current) {
-            uncFileRef.current.value = ''; // Reset file input to allow re-uploading the same file
+            uncFileRef.current.value = '';
             uncFileRef.current.click();
         }
     };
@@ -260,13 +270,47 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setStatus({ type: 'info', message: 'Đã xóa mục đã thanh toán.' });
         }
     };
+    
+    const handleDownloadUnc = async (entry: MblPaymentData) => {
+        setStatus({ type: 'info', message: `Đang chuẩn bị tải UNC cho MBL ${entry.mbl}...` });
+        try {
+            const response = await fetch(entry.hoaDonUrl);
+            if (!response.ok) {
+                throw new Error('Không thể tải file từ server.');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            
+            const filename = `UNC BL ${entry.mbl || entry.maLine}`;
+            const originalFilename = entry.hoaDonFilename || 'file';
+            const extension = originalFilename.split('.').pop() || 'pdf';
+            a.download = `${filename}.${extension}`;
 
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            setStatus({ type: 'success', message: `Đã tải xuống: ${a.download}` });
+        } catch (error) {
+            const err = error as Error;
+            console.error('Download error:', err);
+            setStatus({ type: 'error', message: `Tải file thất bại: ${err.message}` });
+        }
+    };
 
     const statusColor = {
         success: 'text-green-600 bg-green-100 border-green-300',
         error: 'text-red-600 bg-red-100 border-red-300',
         info: 'text-blue-600 bg-blue-100 border-blue-300',
     };
+    
+    const isAdmin = userRole === 'Admin';
+    const isDocument = userRole === 'Document';
 
     return (
         <div className="space-y-6">
@@ -280,7 +324,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             <div className="p-4 border rounded-lg bg-gray-50">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Nhập thông tin thanh toán MBL</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Mã Line Dropdown and Add Field */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-600 mb-1">Mã Line (*)</label>
                         <div className="flex items-center gap-2">
@@ -338,7 +381,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </div>
                 </div>
                 <button onClick={handleAddEntry} disabled={isUploading} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
-                    {isUploading ? 'Đang xử lý...' : '➕ Tạo yêu cầu thanh toán'}
+                    {isUploading ? 'Đang xử lý...' : 'Tạo yêu cầu thanh toán'}
                 </button>
             </div>
 
@@ -377,9 +420,11 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             >
                                                 ✏️
                                             </button>
-                                            <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
-                                                Hoàn thành
-                                            </button>
+                                            {isAdmin && (
+                                                <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
+                                                    Hoàn thành
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -415,9 +460,26 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                         </a>
                                     </td>
                                     <td className="p-2 text-right">
-                                        <button onClick={() => handleDeleteCompleted(entry.id)} className="text-red-600 hover:text-red-800 transition-colors" title="Xóa vĩnh viễn">
-                                            Xóa
-                                        </button>
+                                        <div className="flex justify-end items-center gap-3">
+                                            {(isAdmin || isDocument) && (
+                                                <button
+                                                    onClick={() => handleDownloadUnc(entry)}
+                                                    className="text-blue-600 hover:text-blue-800 transition-colors text-lg"
+                                                    title="Tải UNC về máy"
+                                                >
+                                                    ⬇️
+                                                </button>
+                                            )}
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => handleDeleteCompleted(entry.id)}
+                                                    className="text-red-600 hover:text-red-800 transition-colors text-lg"
+                                                    title="Xóa vĩnh viễn"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
