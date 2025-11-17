@@ -37,6 +37,13 @@ export interface MblPaymentData {
   hoaDonFilename: string;
 }
 
+export interface SubmissionData {
+  id: string;
+  hbl: string;
+  fileUrl: string;
+  fileName: string;
+}
+
 export interface Notification {
   id: string;
   userEmail: string;

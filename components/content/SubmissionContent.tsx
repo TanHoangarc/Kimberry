@@ -1,7 +1,7 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { addNotification } from '../../utils/notifications';
-import { User } from '../../types';
+import { User, SubmissionData } from '../../types';
 
 interface SubmissionContentProps {
   back: () => void;
@@ -9,6 +9,7 @@ interface SubmissionContentProps {
 
 // The new endpoint for our Vercel Serverless Function
 const UPLOAD_API_ENDPOINT = '/api/upload';
+const SUBMISSION_STORAGE_KEY = 'kimberry-refund-submissions';
 
 const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   const [jobId, setJobId] = useState('');
@@ -16,6 +17,39 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string, url?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
+  const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedSubmissions = localStorage.getItem(SUBMISSION_STORAGE_KEY);
+      if (savedSubmissions) {
+        setSubmissions(JSON.parse(savedSubmissions));
+      }
+
+      const userEmailRaw = localStorage.getItem('user');
+      const allUsersRaw = localStorage.getItem('users');
+      if (userEmailRaw && allUsersRaw) {
+        const loggedInUserEmail = JSON.parse(userEmailRaw).email;
+        const allUsers: User[] = JSON.parse(allUsersRaw);
+        const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
+        if (currentUser) {
+          setUserRole(currentUser.role);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load data from localStorage", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SUBMISSION_STORAGE_KEY, JSON.stringify(submissions));
+    } catch (error) {
+      console.error("Failed to save submission data to localStorage", error);
+    }
+  }, [submissions]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -34,7 +68,6 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     setIsUploading(true);
     setUploadStatus({ type: 'info', message: 'Đang tải file lên hệ thống...' });
 
-    // We pass jobId, filename, and the new uploadPath as query parameters
     const searchParams = new URLSearchParams({
         jobId: jobId,
         filename: selectedFile.name,
@@ -56,6 +89,16 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
           errorMessage += ` (Chi tiết: ${result.details})`;
         }
         throw new Error(errorMessage);
+      }
+      
+      if (response.ok && selectedFile) {
+        const newSubmission: SubmissionData = {
+          id: Date.now().toString(),
+          hbl: jobId,
+          fileUrl: result.url,
+          fileName: selectedFile.name,
+        };
+        setSubmissions(prev => [newSubmission, ...prev]);
       }
       
       // --- Create Notification ---
@@ -90,11 +133,19 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     }
   };
   
+  const handleCompleteSubmission = (idToComplete: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn hoàn thành và xóa mục này?')) {
+      setSubmissions(prev => prev.filter(submission => submission.id !== idToComplete));
+    }
+  };
+
   const statusColor = {
     success: 'text-green-600 bg-green-100 border-green-300',
     error: 'text-red-600 bg-red-100 border-red-300',
     info: 'text-blue-600 bg-blue-100 border-blue-300',
   };
+  
+  const isAdmin = userRole === 'Admin';
 
   return (
     <div>
@@ -157,6 +208,53 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
             </button>
         </div>
       </form>
+
+      {isAdmin && (
+        <div className="mt-8 pt-6 border-t">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Danh sách hồ sơ chờ xử lý ({submissions.length})</h3>
+          {submissions.length > 0 ? (
+            <div className="overflow-x-auto border rounded-lg bg-white">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-3 font-semibold">HBL</th>
+                    <th className="p-3 font-semibold">Hồ sơ</th>
+                    <th className="p-3 font-semibold text-right">Tình trạng</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submissions.map((sub) => (
+                    <tr key={sub.id} className="border-b last:border-0 hover:bg-gray-50">
+                      <td className="p-3 whitespace-nowrap font-medium text-gray-800">{sub.hbl}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        <a 
+                          href={sub.fileUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-600 hover:underline"
+                          title={sub.fileName}
+                        >
+                          Xem file
+                        </a>
+                      </td>
+                      <td className="p-3 text-right">
+                        <button 
+                          onClick={() => handleCompleteSubmission(sub.id)}
+                          className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors"
+                        >
+                          Hoàn thành
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-4 bg-gray-50 rounded-md">Không có hồ sơ nào đang chờ xử lý.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
