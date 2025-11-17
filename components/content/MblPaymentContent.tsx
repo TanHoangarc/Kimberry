@@ -290,20 +290,19 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             </button>
                         </div>
                     </div>
-
+                    <input
+                        name="mbl"
+                        value={formData.mbl}
+                        onChange={handleChange}
+                        placeholder="MBL"
+                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
+                    />
                     <input
                         name="soTien"
                         value={formData.soTien ? Number(formData.soTien).toLocaleString('en-US') : ''}
                         onChange={handleChange}
                         placeholder="Số tiền"
                         inputMode="decimal"
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
-                    />
-                    <input
-                        name="mbl"
-                        value={formData.mbl}
-                        onChange={handleChange}
-                        placeholder="MBL"
                         className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
                     />
                     <div className="md:col-span-2">
@@ -335,8 +334,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                         <thead className="bg-gray-100">
                             <tr>
                                 <th className="p-2 font-semibold">Mã Line</th>
-                                <th className="p-2 font-semibold">Số tiền</th>
                                 <th className="p-2 font-semibold">MBL</th>
+                                <th className="p-2 font-semibold">Số tiền</th>
                                 <th className="p-2 font-semibold">Hóa đơn</th>
                                 <th className="p-2 font-semibold text-right">Hành động</th>
                             </tr>
@@ -345,8 +344,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             {entries.map((entry) => (
                                 <tr key={entry.id} className="border-b hover:bg-gray-50">
                                     <td className="p-2 whitespace-nowrap">{entry.maLine}</td>
-                                    <td className="p-2 whitespace-nowrap">{typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}</td>
                                     <td className="p-2 whitespace-nowrap">{entry.mbl || '-'}</td>
+                                    <td className="p-2 whitespace-nowrap">{typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}</td>
                                     <td className="p-2 whitespace-nowrap">
                                         <a href={entry.hoaDonUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" title={entry.hoaDonFilename}>
                                             Xem hóa đơn
@@ -372,8 +371,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                         <thead className="bg-gray-100">
                             <tr>
                                 <th className="p-2 font-semibold">Mã Line</th>
-                                <th className="p-2 font-semibold">Số tiền</th>
                                 <th className="p-2 font-semibold">MBL</th>
+                                <th className="p-2 font-semibold">Số tiền</th>
                                 <th className="p-2 font-semibold">UNC</th>
                                 <th className="p-2 font-semibold text-right">Hành động</th>
                             </tr>
@@ -382,8 +381,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             {completedEntries.map((entry) => (
                                 <tr key={entry.id} className="border-b hover:bg-gray-50">
                                     <td className="p-2 whitespace-nowrap">{entry.maLine}</td>
-                                    <td className="p-2 whitespace-nowrap">{typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}</td>
                                     <td className="p-2 whitespace-nowrap">{entry.mbl || '-'}</td>
+                                    <td className="p-2 whitespace-nowrap">{typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}</td>
                                     <td className="p-2 whitespace-nowrap">
                                         <a href={entry.hoaDonUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" title={entry.hoaDonFilename}>
                                             Xem UNC
