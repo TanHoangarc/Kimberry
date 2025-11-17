@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MblPaymentData } from '../../types';
+import { MblPaymentData, User } from '../../types';
+import { addNotification } from '../../utils/notifications';
+
 
 const UPLOAD_API_ENDPOINT = '/api/upload';
 const PENDING_STORAGE_KEY = 'kimberry-mbl-payment-data';
@@ -9,7 +11,7 @@ const MA_LINE_STORAGE_KEY = 'kimberry-ma-line-options';
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
-    'MSC-HCM', 'MSC-HP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
+    'MSCHCM', 'MSCHP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
     'RCL', 'OOCL', 'CMACGM', 'MARINE-HP', 'SINOVITRANS', 'SNVT-HP', 'HAPAG-LLOYD'
 ].sort();
 
@@ -150,6 +152,19 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             };
 
             setEntries(prev => [...prev, newEntry]);
+            
+            // --- Create Notification ---
+            const userRaw = localStorage.getItem('user');
+            if (userRaw) {
+                const currentUser: Partial<User> = JSON.parse(userRaw);
+                addNotification({
+                  userEmail: currentUser.email || 'Unknown User',
+                  action: 'Thêm thanh toán MBL',
+                  details: `Mã Line: ${newEntry.maLine}`
+                });
+            }
+            // -------------------------
+
             setFormData(initialFormData);
             setSelectedFile(null);
             if(fileInputRef.current) fileInputRef.current.value = '';
@@ -307,13 +322,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </div>
                 </div>
                 <button onClick={handleAddEntry} disabled={isUploading} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
-                    {isUploading ? 'Đang xử lý...' : '➕ Tạo yêu cầu thanh toán'}
+                    {isUploading ? 'Đang xử lý...' : '➕ Thêm vào bảng'}
                 </button>
             </div>
 
             {status && <div className={`p-3 rounded-md border ${statusColor[status.type]}`}>{status.message}</div>}
 
-            <div className="p-4 border rounded-lg">
+            <div className="p-4 border rounded-lg bg-amber-50 border-amber-200">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Danh sách chờ thanh toán ({entries.length} mục)</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -350,7 +365,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 {entries.length === 0 && <p className="text-center text-gray-500 py-4">Chưa có dữ liệu nào.</p>}
             </div>
             
-            <div className="p-4 border rounded-lg">
+            <div className="p-4 border rounded-lg bg-green-50 border-green-200">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Danh sách đã thanh toán ({completedEntries.length} mục)</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">

@@ -36,3 +36,12 @@ export interface MblPaymentData {
   hoaDonUrl: string;
   hoaDonFilename: string;
 }
+
+export interface Notification {
+  id: string;
+  userEmail: string;
+  action: 'Nộp hồ sơ hoàn cược' | 'Thêm thanh toán MBL';
+  details: string;
+  timestamp: string; // ISO string
+  read: boolean;
+}

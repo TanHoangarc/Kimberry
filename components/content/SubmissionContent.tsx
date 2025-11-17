@@ -1,5 +1,7 @@
 
 import React, { useState, useRef } from 'react';
+import { addNotification } from '../../utils/notifications';
+import { User } from '../../types';
 
 interface SubmissionContentProps {
   back: () => void;
@@ -56,6 +58,18 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
         throw new Error(errorMessage);
       }
       
+      // --- Create Notification ---
+      const userRaw = localStorage.getItem('user');
+      if (userRaw) {
+        const currentUser: Partial<User> = JSON.parse(userRaw);
+        addNotification({
+          userEmail: currentUser.email || 'Unknown User',
+          action: 'Nộp hồ sơ hoàn cược',
+          details: `HBL: ${jobId}`
+        });
+      }
+      // -------------------------
+
       setUploadStatus({ 
         type: 'success', 
         message: result.message || 'Tải file lên thành công!',
