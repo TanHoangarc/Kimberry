@@ -11,7 +11,7 @@ const MA_LINE_STORAGE_KEY = 'kimberry-ma-line-options';
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
-    'MSCHCM', 'MSCHP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
+    'MSC-HCM', 'MSC-HP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
     'RCL', 'OOCL', 'CMACGM', 'MARINE-HP', 'SINOVITRANS', 'SNVT-HP', 'HAPAG-LLOYD'
 ].sort();
 
@@ -338,7 +338,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </div>
                 </div>
                 <button onClick={handleAddEntry} disabled={isUploading} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
-                    {isUploading ? 'Đang xử lý...' : '➕ Thêm vào bảng'}
+                    {isUploading ? 'Đang xử lý...' : '➕ Tạo yêu cầu thanh toán'}
                 </button>
             </div>
 
