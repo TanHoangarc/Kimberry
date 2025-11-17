@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ViewType } from '../types';
+import { ViewType, User } from '../types';
 
 interface NavbarProps {
   setActiveView: (view: ViewType) => void;
@@ -35,24 +35,23 @@ const NavButton: React.FC<{
 
 
 const Navbar: React.FC<NavbarProps> = ({ setActiveView }) => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [canViewMblPayment, setCanViewMblPayment] = useState(false);
+  const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
 
   useEffect(() => {
-    const userRaw = localStorage.getItem('user');
-    if (userRaw) {
-      const user = JSON.parse(userRaw);
-      // This list can be expanded with more authorized emails
-      const mblPaymentUsers = ['finance@kimberryline.com', 'doc@kimberry.com']; 
-
-      if (user.email === 'tanhoangarc@gmail.com') {
-        setIsAdmin(true);
-        setCanViewMblPayment(true); // Admin can see everything
-      } else if (mblPaymentUsers.includes(user.email)) {
-        setCanViewMblPayment(true);
+    const userEmailRaw = localStorage.getItem('user');
+    const allUsersRaw = localStorage.getItem('users');
+    if (userEmailRaw && allUsersRaw) {
+      const loggedInUserEmail = JSON.parse(userEmailRaw).email;
+      const allUsers: User[] = JSON.parse(allUsersRaw);
+      const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
+      if (currentUser) {
+        setUserRole(currentUser.role);
       }
     }
   }, []);
+
+  const isAdmin = userRole === 'Admin';
+  const isDocument = userRole === 'Document';
 
   return (
     <nav className="flex justify-center flex-wrap bg-white p-2 shadow-md sticky top-0 z-20">
@@ -62,18 +61,20 @@ const Navbar: React.FC<NavbarProps> = ({ setActiveView }) => {
       <NavButton onClick={() => setActiveView('template')}>File mẫu CVHC</NavButton>
       <NavButton onClick={() => setActiveView('marketing')}>Tra cứu Job</NavButton>
       <NavButton onClick={() => setActiveView('submission')}>Nộp hồ sơ hoàn cược</NavButton>
-      {canViewMblPayment && (
+      
+      {(isAdmin || isDocument) && (
         <NavButton onClick={() => setActiveView('mblPayment')} isSpecial={true}>
             💳 Thanh toán MBL
         </NavButton>
       )}
+
       {isAdmin && (
         <>
-          <NavButton onClick={() => setActiveView('admin')} isAdmin={true}>
-            ⚙️ Quản lý User
-          </NavButton>
           <NavButton onClick={() => setActiveView('dataEntry')} isAdmin={true}>
             📝 Nhập liệu
+          </NavButton>
+          <NavButton onClick={() => setActiveView('admin')} isAdmin={true}>
+            ⚙️ Cài đặt
           </NavButton>
         </>
       )}

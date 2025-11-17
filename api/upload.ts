@@ -38,7 +38,7 @@ export default async function handler(
   }
   
   // Whitelist allowed paths for security
-  const allowedPaths = ['CVHC', 'MBL'];
+  const allowedPaths = ['CVHC', 'MBL', 'DONE'];
   if (!allowedPaths.includes(uploadPath)) {
       return response.status(400).json({ error: 'Invalid upload path specified.' });
   }

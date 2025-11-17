@@ -1,6 +1,12 @@
 
 export type ViewType = 'default' | 'tariff' | 'handbook' | 'policies' | 'template' | 'marketing' | 'submission' | 'admin' | 'dataEntry' | 'mblPayment';
 
+export interface User {
+  email: string;
+  password?: string;
+  role: 'Admin' | 'Document' | 'Customer';
+}
+
 export interface JobData {
   Thang?: string;
   Ma?: string;

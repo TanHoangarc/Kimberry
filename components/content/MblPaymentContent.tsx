@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MblPaymentData } from '../../types';
 
 const UPLOAD_API_ENDPOINT = '/api/upload';
-const LOCAL_STORAGE_KEY = 'kimberry-mbl-payment-data';
+const PENDING_STORAGE_KEY = 'kimberry-mbl-payment-data';
+const COMPLETED_STORAGE_KEY = 'kimberry-mbl-completed-payment-data';
 const MA_LINE_STORAGE_KEY = 'kimberry-ma-line-options';
 
 const DEFAULT_MA_LINE_OPTIONS = [
@@ -27,19 +28,24 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     const [formData, setFormData] = useState(initialFormData);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [entries, setEntries] = useState<MblPaymentData[]>([]);
+    const [completedEntries, setCompletedEntries] = useState<MblPaymentData[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [completingEntryId, setCompletingEntryId] = useState<string | null>(null);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const uncFileRef = useRef<HTMLInputElement>(null);
     
     const [maLineOptions, setMaLineOptions] = useState<string[]>([]);
     const [newMaLine, setNewMaLine] = useState('');
 
     useEffect(() => {
         try {
-            const savedEntries = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedEntries) {
-                setEntries(JSON.parse(savedEntries));
-            }
+            const savedEntries = localStorage.getItem(PENDING_STORAGE_KEY);
+            if (savedEntries) setEntries(JSON.parse(savedEntries));
+
+            const savedCompleted = localStorage.getItem(COMPLETED_STORAGE_KEY);
+            if (savedCompleted) setCompletedEntries(JSON.parse(savedCompleted));
 
             const savedMaLines = localStorage.getItem(MA_LINE_STORAGE_KEY);
             if (savedMaLines) {
@@ -55,11 +61,19 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
     useEffect(() => {
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(entries));
+            localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(entries));
         } catch (error) {
             console.error("Failed to save MBL payment data to localStorage", error);
         }
     }, [entries]);
+    
+     useEffect(() => {
+        try {
+            localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(completedEntries));
+        } catch (error) {
+            console.error("Failed to save completed MBL payment data to localStorage", error);
+        }
+    }, [completedEntries]);
     
     useEffect(() => {
         try {
@@ -113,9 +127,9 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         setStatus({ type: 'info', message: 'Đang tải hóa đơn và lưu thông tin...' });
 
         const searchParams = new URLSearchParams({
-            jobId: `MBL-${formData.maLine}-${Date.now()}`, // Add timestamp for uniqueness
+            jobId: `MBL-${formData.maLine}-${Date.now()}`,
             filename: selectedFile.name,
-            uploadPath: 'MBL' // Direct files to the MBL folder
+            uploadPath: 'MBL'
         });
 
         try {
@@ -130,7 +144,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             const newEntry: MblPaymentData = {
                 id: Date.now().toString(),
                 ...formData,
-                soTien: formData.soTien || 0, // Ensure soTien is a number
+                soTien: formData.soTien || 0,
                 hoaDonUrl: result.url,
                 hoaDonFilename: selectedFile.name,
             };
@@ -149,10 +163,73 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
     };
 
-    const handleComplete = (idToComplete: string) => {
-        setEntries(prev => prev.filter(entry => entry.id !== idToComplete));
-        setStatus({ type: 'info', message: 'Đã hoàn thành và xóa thanh toán khỏi bảng.' });
+    const handleCompleteClick = (idToComplete: string) => {
+        setCompletingEntryId(idToComplete);
+        if (uncFileRef.current) {
+            uncFileRef.current.value = ''; // Reset file input to allow re-uploading the same file
+            uncFileRef.current.click();
+        }
     };
+    
+    const handleUncFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files || event.target.files.length === 0 || !completingEntryId) {
+            setCompletingEntryId(null);
+            return;
+        }
+
+        const uncFile = event.target.files[0];
+        const originalEntry = entries.find(e => e.id === completingEntryId);
+
+        if (!originalEntry) {
+            setStatus({ type: 'error', message: 'Không tìm thấy mục gốc để hoàn thành.' });
+            setCompletingEntryId(null);
+            return;
+        }
+        
+        setIsUploading(true);
+        setStatus({ type: 'info', message: `Đang tải file UNC cho Mã Line ${originalEntry.maLine}...` });
+
+        const searchParams = new URLSearchParams({
+            jobId: `DONE-${originalEntry.maLine}-${originalEntry.id}`,
+            filename: uncFile.name,
+            uploadPath: 'DONE'
+        });
+
+        try {
+            const response = await fetch(`${UPLOAD_API_ENDPOINT}?${searchParams.toString()}`, {
+                method: 'POST',
+                body: uncFile,
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Lỗi server khi tải UNC.');
+
+            const completedEntry: MblPaymentData = {
+                ...originalEntry,
+                hoaDonUrl: result.url,
+                hoaDonFilename: uncFile.name,
+            };
+
+            setCompletedEntries(prev => [...prev, completedEntry]);
+            setEntries(prev => prev.filter(entry => entry.id !== completingEntryId));
+            setStatus({ type: 'success', message: `Đã hoàn thành thanh toán cho Mã Line "${originalEntry.maLine}".` });
+
+        } catch (error) {
+            const err = error as Error;
+            setStatus({ type: 'error', message: `Hoàn thành thất bại: ${err.message}` });
+        } finally {
+            setIsUploading(false);
+            setCompletingEntryId(null);
+        }
+    };
+
+    const handleDeleteCompleted = (idToDelete: string) => {
+        if (window.confirm('Bạn có chắc muốn xóa vĩnh viễn mục đã thanh toán này?')) {
+            setCompletedEntries(prev => prev.filter(entry => entry.id !== idToDelete));
+            setStatus({ type: 'info', message: 'Đã xóa mục đã thanh toán.' });
+        }
+    };
+
 
     const statusColor = {
         success: 'text-green-600 bg-green-100 border-green-300',
@@ -162,6 +239,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
     return (
         <div className="space-y-6">
+             <input
+                type="file"
+                ref={uncFileRef}
+                onChange={handleUncFileSelected}
+                className="hidden"
+                accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx"
+            />
             <div className="p-4 border rounded-lg bg-gray-50">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Nhập thông tin thanh toán MBL</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,7 +338,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                         </a>
                                     </td>
                                     <td className="p-2 text-right">
-                                        <button onClick={() => handleComplete(entry.id)} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors" title="Hoàn thành thanh toán">
+                                        <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
                                             Hoàn thành
                                         </button>
                                     </td>
@@ -264,6 +348,43 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </table>
                 </div>
                 {entries.length === 0 && <p className="text-center text-gray-500 py-4">Chưa có dữ liệu nào.</p>}
+            </div>
+            
+            <div className="p-4 border rounded-lg">
+                <h3 className="text-lg font-semibold mb-3 text-gray-700">Danh sách đã thanh toán ({completedEntries.length} mục)</h3>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="p-2 font-semibold">Mã Line</th>
+                                <th className="p-2 font-semibold">Số tiền</th>
+                                <th className="p-2 font-semibold">MBL</th>
+                                <th className="p-2 font-semibold">UNC</th>
+                                <th className="p-2 font-semibold text-right">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {completedEntries.map((entry) => (
+                                <tr key={entry.id} className="border-b hover:bg-gray-50">
+                                    <td className="p-2 whitespace-nowrap">{entry.maLine}</td>
+                                    <td className="p-2 whitespace-nowrap">{typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}</td>
+                                    <td className="p-2 whitespace-nowrap">{entry.mbl || '-'}</td>
+                                    <td className="p-2 whitespace-nowrap">
+                                        <a href={entry.hoaDonUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" title={entry.hoaDonFilename}>
+                                            Xem UNC
+                                        </a>
+                                    </td>
+                                    <td className="p-2 text-right">
+                                        <button onClick={() => handleDeleteCompleted(entry.id)} className="text-red-600 hover:text-red-800 transition-colors" title="Xóa vĩnh viễn">
+                                            Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                {completedEntries.length === 0 && <p className="text-center text-gray-500 py-4">Chưa có dữ liệu nào.</p>}
             </div>
         </div>
     );

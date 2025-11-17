@@ -3,7 +3,7 @@ import Header from './components/Header';
 import Navbar from './components/Navbar';
 import MainContent from './components/MainContent';
 import Contacts from './components/Contacts';
-import { ViewType } from './types';
+import { ViewType, User } from './types';
 import AuthPage from './components/auth/AuthPage';
 
 const App: React.FC = () => {
@@ -12,30 +12,46 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const usersRaw = localStorage.getItem('users');
-    let users = usersRaw ? JSON.parse(usersRaw) : [];
+    let users: User[] = usersRaw ? JSON.parse(usersRaw) : [];
     let usersUpdated = false;
 
-    // Ensure the admin account exists
+    // Ensure the admin account exists with the correct role
     const adminEmail = 'tanhoangarc@gmail.com';
-    const adminExists = users.some((user: any) => user.email === adminEmail);
-    if (!adminExists) {
+    const adminUser = users.find((user) => user.email === adminEmail);
+    if (!adminUser) {
       users.push({
         email: adminEmail,
         password: 'Hoang@2609#',
+        role: 'Admin',
       });
+      usersUpdated = true;
+    } else if (adminUser.role !== 'Admin') {
+      adminUser.role = 'Admin';
       usersUpdated = true;
     }
 
-    // Ensure the doc account exists
+    // Ensure the doc account exists with the correct role
     const docEmail = 'doc@kimberry.com';
-    const docUserExists = users.some((user: any) => user.email === docEmail);
-    if (!docUserExists) {
+    const docUser = users.find((user) => user.email === docEmail);
+    if (!docUser) {
       users.push({
         email: docEmail,
         password: 'Kimberry@123',
+        role: 'Document',
       });
       usersUpdated = true;
+    } else if (docUser.role !== 'Document') {
+        docUser.role = 'Document';
+        usersUpdated = true;
     }
+    
+    // Assign 'Customer' role to any user without a role
+    users.forEach(user => {
+        if (!user.role) {
+            user.role = 'Customer';
+            usersUpdated = true;
+        }
+    });
 
     if (usersUpdated) {
       localStorage.setItem('users', JSON.stringify(users));
