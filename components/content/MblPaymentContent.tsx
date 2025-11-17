@@ -11,7 +11,7 @@ const MA_LINE_STORAGE_KEY = 'kimberry-ma-line-options';
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
-    'MSC-HCM', 'MSC-HP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
+    'MSCHCM', 'MSCHP', 'HAIAN-HCM', 'HAIAN-HP', 'MAERSK', 'JINJIANG', 'ORIMAS',
     'RCL', 'OOCL', 'CMACGM', 'MARINE-HP', 'SINOVITRANS', 'SNVT-HP', 'HAPAG-LLOYD'
 ].sort();
 
@@ -178,6 +178,22 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
     };
 
+    const handleLoadForEditing = (idToLoad: string) => {
+        const entryToLoad = entries.find(entry => entry.id === idToLoad);
+        if (entryToLoad) {
+            const { maLine, soTien, mbl } = entryToLoad;
+            setFormData({ maLine, soTien, mbl });
+
+            setSelectedFile(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+
+            setEntries(prev => prev.filter(entry => entry.id !== idToLoad));
+            setStatus({ type: 'info', message: `Đã tải ${entryToLoad.mbl || entryToLoad.maLine} lên để chỉnh sửa. Vui lòng chọn lại file hóa đơn.` });
+        }
+    };
+
     const handleCompleteClick = (idToComplete: string) => {
         setCompletingEntryId(idToComplete);
         if (uncFileRef.current) {
@@ -290,6 +306,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             </button>
                         </div>
                     </div>
+
                     <input
                         name="mbl"
                         value={formData.mbl}
@@ -297,7 +314,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                         placeholder="MBL"
                         className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
                     />
-                    <input
+                     <input
                         name="soTien"
                         value={formData.soTien ? Number(formData.soTien).toLocaleString('en-US') : ''}
                         onChange={handleChange}
@@ -321,7 +338,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </div>
                 </div>
                 <button onClick={handleAddEntry} disabled={isUploading} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
-                    {isUploading ? 'Đang xử lý...' : '➕ Tạo yêu cầu thanh toán'}
+                    {isUploading ? 'Đang xử lý...' : '➕ Thêm vào bảng'}
                 </button>
             </div>
 
@@ -352,9 +369,18 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                         </a>
                                     </td>
                                     <td className="p-2 text-right">
-                                        <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
-                                            Hoàn thành
-                                        </button>
+                                        <div className="flex justify-end items-center gap-3">
+                                            <button
+                                                onClick={() => handleLoadForEditing(entry.id)}
+                                                className="text-blue-600 hover:text-blue-800 transition-colors text-lg"
+                                                title="Sửa lại"
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
+                                                Hoàn thành
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
