@@ -32,10 +32,11 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     setIsUploading(true);
     setUploadStatus({ type: 'info', message: 'Đang tải file lên hệ thống...' });
 
-    // We pass jobId and filename as query parameters
+    // We pass jobId, filename, and the new uploadPath as query parameters
     const searchParams = new URLSearchParams({
         jobId: jobId,
-        filename: selectedFile.name
+        filename: selectedFile.name,
+        uploadPath: 'CVHC' // Direct files to the CVHC folder
     });
 
     try {

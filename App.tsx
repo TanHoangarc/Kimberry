@@ -11,18 +11,33 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Ensure the admin account exists
-    const adminEmail = 'tanhoangarc@gmail.com';
     const usersRaw = localStorage.getItem('users');
     let users = usersRaw ? JSON.parse(usersRaw) : [];
+    let usersUpdated = false;
 
+    // Ensure the admin account exists
+    const adminEmail = 'tanhoangarc@gmail.com';
     const adminExists = users.some((user: any) => user.email === adminEmail);
-
     if (!adminExists) {
       users.push({
         email: adminEmail,
         password: 'Hoang@2609#',
       });
+      usersUpdated = true;
+    }
+
+    // Ensure the doc account exists
+    const docEmail = 'doc@kimberry.com';
+    const docUserExists = users.some((user: any) => user.email === docEmail);
+    if (!docUserExists) {
+      users.push({
+        email: docEmail,
+        password: 'Kimberry@123',
+      });
+      usersUpdated = true;
+    }
+
+    if (usersUpdated) {
       localStorage.setItem('users', JSON.stringify(users));
     }
     

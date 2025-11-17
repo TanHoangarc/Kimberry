@@ -37,6 +37,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
     const [jobEntries, setJobEntries] = useState<JobData[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [isJobLoading, setIsJobLoading] = useState(false);
+    const [isSheetLoading, setIsSheetLoading] = useState(false);
     
     // State for calendar popup
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -62,6 +63,57 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             console.error("Failed to save data to localStorage", error);
         }
     }, [jobEntries]);
+
+    const handleLoadFromSheet = async () => {
+        const maToLoad = formData.Ma?.trim();
+        if (!maToLoad) {
+            setStatus({ type: 'error', message: 'Vui lòng nhập Mã Job để tải dữ liệu.' });
+            return;
+        }
+
+        setIsSheetLoading(true);
+        setStatus({ type: 'info', message: `Đang tìm và tải dữ liệu cho Job "${maToLoad}"...` });
+
+        try {
+            const jobInTempTable = jobEntries.find(job => job.Ma?.trim().toLowerCase() === maToLoad.toLowerCase());
+            if (jobInTempTable) {
+                setStatus({ type: 'error', message: `Job "${maToLoad}" đã có trong bảng tạm. Vui lòng tải từ bảng tạm để sửa.` });
+                setIsSheetLoading(false);
+                return;
+            }
+
+            const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(maToLoad)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            const searchResult: JobData | null = Array.isArray(data) && data.length > 0 ? data[0] : (data && Object.keys(data).length > 0 ? data : null);
+
+            if (!searchResult) {
+                setStatus({ type: 'error', message: `Không tìm thấy dữ liệu cho Job "${maToLoad}" trên Google Sheet.` });
+            } else {
+                const loadedData = {
+                    ...initialFormData,
+                    ...searchResult,
+                    MaKH: searchResult.MaKH ? Number(String(searchResult.MaKH).replace(/[^0-9]/g, '')) : '',
+                    SoTien: searchResult.SoTien ? Number(String(searchResult.SoTien).replace(/[^0-9]/g, '')) : '',
+                };
+                setFormData(loadedData);
+                setStatus({ type: 'success', message: `Đã tải thành công dữ liệu cho Job "${maToLoad}".` });
+            }
+
+        } catch (err) {
+            console.error(err);
+            setStatus({ type: 'error', message: "Lỗi kết nối hoặc không tìm thấy dữ liệu từ Google Sheet." });
+        } finally {
+            setIsSheetLoading(false);
+        }
+    };
 
     const handleDateSelect = (date: Date) => {
         const day = String(date.getDate()).padStart(2, '0');
@@ -222,6 +274,17 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                             placeholder={field.label.replace(' (*)', '') + '...'}
                                             className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
                                         />
+                                    )}
+                                    {field.name === 'Ma' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleLoadFromSheet}
+                                            disabled={isSheetLoading}
+                                            className="px-3 py-2 bg-indigo-500 text-white rounded-md text-sm hover:bg-indigo-600 transition-colors flex-shrink-0 whitespace-nowrap disabled:bg-gray-400"
+                                            title="Tải dữ liệu từ Google Sheet"
+                                        >
+                                            {isSheetLoading ? '⏳' : 'Tải'}
+                                        </button>
                                     )}
                                     {field.name === 'TrangThai' && (
                                         <button

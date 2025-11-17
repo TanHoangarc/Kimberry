@@ -28,17 +28,24 @@ export default async function handler(
     return response.status(405).json({ error: `Method ${request.method} Not Allowed` });
   }
 
-  // Extract filename and jobId from query parameters
+  // Extract parameters from query
   const filename = request.query.filename as string;
   const jobId = request.query.jobId as string;
+  const uploadPath = request.query.uploadPath as string;
 
-  if (!filename || !jobId) {
-    return response.status(400).json({ error: 'Filename and JobId query parameters are required' });
+  if (!filename || !jobId || !uploadPath) {
+    return response.status(400).json({ error: 'Filename, JobId, and uploadPath query parameters are required.' });
   }
   
+  // Whitelist allowed paths for security
+  const allowedPaths = ['CVHC', 'MBL'];
+  if (!allowedPaths.includes(uploadPath)) {
+      return response.status(400).json({ error: 'Invalid upload path specified.' });
+  }
+
   try {
-    // Construct a unique path for the blob
-    const blobPath = `submissions/${jobId}/${filename}`;
+    // Construct a unique path for the blob using the dynamic upload path
+    const blobPath = `${uploadPath}/${jobId}/${filename}`;
 
     // Upload the file to Vercel Blob. The `request` object itself is a ReadableStream
     // containing the file data, which `put` can handle directly.
@@ -48,7 +55,7 @@ export default async function handler(
 
     // Return the successful response with the blob's URL
     return response.status(200).json({
-        message: `File ${filename} uploaded successfully for Job ${jobId}.`,
+        message: `File ${filename} uploaded successfully to ${uploadPath} for Job ${jobId}.`,
         url: blob.url 
     });
   } catch (error) {
