@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { MblPaymentData, User } from '../../types';
 import { addNotification } from '../../utils/notifications';
@@ -76,6 +75,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     useEffect(() => {
         try {
             localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(entries));
+            window.dispatchEvent(new CustomEvent('pending_lists_updated'));
         } catch (error) {
             console.error("Failed to save MBL payment data to localStorage", error);
         }
@@ -264,10 +264,35 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
     };
 
-    const handleDeleteCompleted = (idToDelete: string) => {
-        if (window.confirm('Bạn có chắc muốn xóa vĩnh viễn mục đã thanh toán này?')) {
-            setCompletedEntries(prev => prev.filter(entry => entry.id !== idToDelete));
-            setStatus({ type: 'info', message: 'Đã xóa mục đã thanh toán.' });
+    const handleDeleteCompleted = async (entryToDelete: MblPaymentData) => {
+        if (!window.confirm('Bạn có chắc muốn xóa vĩnh viễn mục đã thanh toán này? Thao tác này cũng sẽ xóa file UNC khỏi máy chủ.')) {
+            return;
+        }
+
+        const urlToDelete = entryToDelete.hoaDonUrl;
+        setStatus({ type: 'info', message: 'Đang xóa file và mục...' });
+        
+        try {
+            if (urlToDelete) {
+                const response = await fetch('/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlToDelete }),
+                });
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.error || 'Lỗi server khi xóa file.');
+                }
+            }
+
+            setCompletedEntries(prev => prev.filter(entry => entry.id !== entryToDelete.id));
+            setStatus({ type: 'success', message: 'Đã xóa thành công mục và file UNC.' });
+
+        } catch (error) {
+            const err = error as Error;
+            console.error('Delete error:', err);
+            setStatus({ type: 'error', message: `Xóa thất bại: ${err.message}. Mục chưa được xóa.` });
         }
     };
     
@@ -472,7 +497,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             )}
                                             {isAdmin && (
                                                 <button
-                                                    onClick={() => handleDeleteCompleted(entry.id)}
+                                                    onClick={() => handleDeleteCompleted(entry)}
                                                     className="text-red-600 hover:text-red-800 transition-colors text-lg"
                                                     title="Xóa vĩnh viễn"
                                                 >

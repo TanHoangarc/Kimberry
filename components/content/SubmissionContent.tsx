@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { addNotification } from '../../utils/notifications';
 import { User, SubmissionData } from '../../types';
@@ -46,6 +45,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   useEffect(() => {
     try {
       localStorage.setItem(SUBMISSION_STORAGE_KEY, JSON.stringify(submissions));
+      window.dispatchEvent(new CustomEvent('pending_lists_updated'));
     } catch (error) {
       console.error("Failed to save submission data to localStorage", error);
     }

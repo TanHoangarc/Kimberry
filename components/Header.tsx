@@ -7,10 +7,14 @@ interface HeaderProps {
   onLogout?: () => void;
 }
 
+const SUBMISSION_STORAGE_KEY = 'kimberry-refund-submissions';
+const MBL_PENDING_STORAGE_KEY = 'kimberry-mbl-payment-data';
+
 const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [persistentBadgeCount, setPersistentBadgeCount] = useState(0);
 
   useEffect(() => {
     // Determine user role to show/hide admin features
@@ -25,15 +29,36 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
       }
     }
 
+    // --- New Logic for Persistent Badge Count ---
+    const updatePersistentBadgeCount = () => {
+      try {
+        const submissionsRaw = localStorage.getItem(SUBMISSION_STORAGE_KEY);
+        const mblPendingRaw = localStorage.getItem(MBL_PENDING_STORAGE_KEY);
+
+        const submissionsCount = submissionsRaw ? JSON.parse(submissionsRaw).length : 0;
+        const mblPendingCount = mblPendingRaw ? JSON.parse(mblPendingRaw).length : 0;
+        
+        setPersistentBadgeCount(submissionsCount + mblPendingCount);
+      } catch (error) {
+        console.error("Failed to calculate persistent badge count:", error);
+        setPersistentBadgeCount(0);
+      }
+    };
+
     // Set up notification listener for real-time updates
     const updateNotifications = () => {
       setNotifications(getNotifications());
     };
-    updateNotifications(); // Initial load
+
+    updateNotifications(); // Initial load for panel
+    updatePersistentBadgeCount(); // Initial calculation for badge
+
     window.addEventListener('notifications_updated', updateNotifications);
+    window.addEventListener('pending_lists_updated', updatePersistentBadgeCount);
     
     return () => {
       window.removeEventListener('notifications_updated', updateNotifications);
+      window.removeEventListener('pending_lists_updated', updatePersistentBadgeCount);
     };
   }, []);
 
@@ -48,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   };
   
   return (
-    <header className="bg-cover bg-center relative text-white text-center py-10 px-5">
+    <header className="bg-cover bg-center relative text-white text-center py-10 px-5 z-30">
       <div
         className="absolute inset-0 bg-no-repeat bg-cover bg-center"
         style={{ backgroundImage: "url('https://picsum.photos/1200/400?image=1043')" }}
@@ -61,14 +86,14 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             <button
               onClick={handleBellClick}
               className="relative bg-white/20 text-white hover:bg-white/40 p-2 rounded-full transition-colors duration-300"
-              aria-label={`Notifications (${unreadCount} unread)`}
+              aria-label={`Notifications (${persistentBadgeCount} pending tasks)`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              {unreadCount > 0 && (
+              {persistentBadgeCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                  {unreadCount}
+                  {persistentBadgeCount}
                 </span>
               )}
             </button>
