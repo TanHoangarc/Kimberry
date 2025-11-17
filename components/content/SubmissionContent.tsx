@@ -47,7 +47,12 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Có lỗi xảy ra khi tải file.');
+        let errorMessage = result.error || 'Có lỗi xảy ra khi tải file.';
+        if (result.details) {
+          // Append details from server for better debugging
+          errorMessage += ` (Chi tiết: ${result.details})`;
+        }
+        throw new Error(errorMessage);
       }
       
       setUploadStatus({ 
