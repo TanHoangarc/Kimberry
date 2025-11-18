@@ -38,6 +38,8 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [isJobLoading, setIsJobLoading] = useState(false);
     const [isSheetLoading, setIsSheetLoading] = useState(false);
+    const [processingText, setProcessingText] = useState('');
+    const [isChecking, setIsChecking] = useState(false);
     
     // State for calendar popup
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -201,6 +203,45 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             setIsJobLoading(false);
         }
     };
+    
+    const handleCheckExistingJobs = async () => {
+        if (jobEntries.length === 0) {
+            setStatus({ type: 'info', message: 'Không có dữ liệu trong bảng tạm để kiểm tra.' });
+            return;
+        }
+        setIsChecking(true);
+        setStatus({ type: 'info', message: `Đang kiểm tra ${jobEntries.length} mục tồn tại trên Google Sheet...` });
+
+        const checkJobExists = async (job: JobData): Promise<boolean> => {
+            if (!job.Ma || !job.Ma.trim()) return false;
+            try {
+                const response = await fetch(`${WEB_APP_URL}?q=${encodeURIComponent(job.Ma.trim())}`);
+                if (!response.ok) {
+                    console.error(`Network error for job ${job.Ma}`);
+                    return false;
+                }
+                const data = await response.json();
+                const exists = Array.isArray(data) && data.length > 0;
+                return exists;
+            } catch (error) {
+                console.error(`Error checking job ${job.Ma}:`, error);
+                return false;
+            }
+        };
+
+        const existenceChecks = await Promise.all(jobEntries.map(checkJobExists));
+        const jobsToKeep = jobEntries.filter((_, index) => !existenceChecks[index]);
+        const numRemoved = jobEntries.length - jobsToKeep.length;
+
+        setJobEntries(jobsToKeep);
+
+        if (numRemoved > 0) {
+            setStatus({ type: 'success', message: `Kiểm tra hoàn tất. Đã xóa ${numRemoved} mục đã tồn tại trên Google Sheet.` });
+        } else {
+            setStatus({ type: 'info', message: 'Kiểm tra hoàn tất. Tất cả các mục trong bảng tạm đều chưa có trên Google Sheet.' });
+        }
+        setIsChecking(false);
+    };
 
     const handleDownloadExcel = () => {
         if (jobEntries.length === 0) {
@@ -218,6 +259,48 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             setStatus({ type: 'error', message: 'Không thể xuất file Excel.' });
         }
     };
+
+    const handleProcessData = () => {
+        if (!processingText.trim()) {
+            setStatus({ type: 'error', message: 'Vui lòng nhập dữ liệu để xử lý.' });
+            return;
+        }
+    
+        const updatedData: Partial<JobData> = {};
+    
+        // 1. Extract Local Charge (first number with commas at the start of the string)
+        const chargeMatch = processingText.match(/^(\d{1,3}(,\d{3})*(\.\d+)?)/);
+        if (chargeMatch) {
+            updatedData.MaKH = chargeMatch[0].replace(/,/g, '');
+        }
+    
+        // 2. Extract Job Code: KMLSHA or KMLTAO, can contain spaces, followed by digits that can contain spaces.
+        const jobRegex = /(K\s*M\s*L\s*S\s*H\s*A\s*(\d+(\s*\d+)*)|K\s*M\s*L\s*T\s*A\s*O\s*(\d+(\s*\d+)*))/i;
+        const jobMatch = processingText.match(jobRegex);
+        if (jobMatch) {
+            // The full match is in jobMatch[0]. Clean it by removing all spaces and making it uppercase.
+            updatedData.Ma = jobMatch[0].replace(/\s/g, '').toUpperCase();
+        }
+        
+        // 3. Extract Month from a date in dd/mm/yyyy format
+        const dateMatch = processingText.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (dateMatch && dateMatch[2]) {
+            const monthNumber = parseInt(dateMatch[2], 10);
+            if (!isNaN(monthNumber) && monthNumber >= 1 && monthNumber <= 12) {
+                updatedData.Thang = `Tháng ${monthNumber}`;
+            }
+        }
+    
+        if (Object.keys(updatedData).length > 0) {
+            setFormData(prev => ({
+                ...prev,
+                ...updatedData
+            }));
+            setStatus({ type: 'success', message: 'Đã xử lý và điền dữ liệu vào mục nhập liệu.' });
+        } else {
+            setStatus({ type: 'error', message: 'Không thể trích xuất dữ liệu. Vui lòng kiểm tra định dạng văn bản.' });
+        }
+    };
     
     const statusColor = {
         success: 'text-green-600 bg-green-100 border-green-300',
@@ -233,6 +316,26 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                     onClose={() => setIsCalendarOpen(false)}
                 />
             )}
+
+            <div className="p-4 border rounded-lg bg-gray-50">
+                <h3 className="text-lg font-semibold mb-3 text-gray-700">Xử lý dữ liệu</h3>
+                <textarea
+                    value={processingText}
+                    onChange={(e) => setProcessingText(e.target.value)}
+                    placeholder="Dán dữ liệu vào đây, ví dụ: '54,000,000	... bill KMLSHA11060060 ... 18/11/2025'"
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none min-h-[100px]"
+                    aria-label="Data processing input"
+                />
+                <button 
+                    onClick={handleProcessData} 
+                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+                    </svg>
+                    Xử lý
+                </button>
+            </div>
 
             <div className="p-4 border rounded-lg bg-gray-50">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Mục Nhập Liệu</h3>
@@ -351,10 +454,25 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                 </div>
                 {jobEntries.length === 0 && <p className="text-center text-gray-500 py-4">Bảng tạm trống.</p>}
                 <div className="flex flex-wrap gap-4 mt-4">
-                    <button onClick={handleSync} disabled={isJobLoading || jobEntries.length === 0} className="px-4 py-2 bg-[#184d47] text-white rounded-md hover:bg-opacity-80 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <button
+                        onClick={handleSync}
+                        disabled={isJobLoading || isChecking || jobEntries.length === 0}
+                        className="px-4 py-2 bg-[#184d47] text-white rounded-md hover:bg-opacity-80 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
                         {isJobLoading ? 'Đang đồng bộ...' : `☁️ Đồng bộ ${jobEntries.length} mục`}
                     </button>
-                    <button onClick={handleDownloadExcel} disabled={jobEntries.length === 0} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <button
+                        onClick={handleCheckExistingJobs}
+                        disabled={isChecking || isJobLoading || jobEntries.length === 0}
+                        className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                        {isChecking ? 'Đang kiểm tra...' : '🔍 Kiểm tra'}
+                    </button>
+                    <button
+                        onClick={handleDownloadExcel}
+                        disabled={jobEntries.length === 0 || isChecking || isJobLoading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
                         ⬇️ Tải xuống Excel
                     </button>
                 </div>
