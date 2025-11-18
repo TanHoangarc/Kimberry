@@ -274,12 +274,28 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             updatedData.MaKH = chargeMatch[0].replace(/,/g, '');
         }
     
-        // 2. Extract Job Code: KMLSHA or KMLTAO, can contain spaces, followed by digits that can contain spaces.
-        const jobRegex = /(K\s*M\s*L\s*S\s*H\s*A\s*(\d+(\s*\d+)*)|K\s*M\s*L\s*T\s*A\s*O\s*(\d+(\s*\d+)*))/i;
-        const jobMatch = processingText.match(jobRegex);
+        // 2. Extract Job Code: KMLSHA or KMLTAO, followed by exactly 8 digits.
+        const jobPrefixRegex = /(K\s*M\s*L\s*S\s*H\s*A|K\s*M\s*L\s*T\s*A\s*O)/i;
+        const jobMatch = processingText.match(jobPrefixRegex);
+
         if (jobMatch) {
-            // The full match is in jobMatch[0]. Clean it by removing all spaces and making it uppercase.
-            updatedData.Ma = jobMatch[0].replace(/\s/g, '').toUpperCase();
+            const jobPrefix = jobMatch[0].replace(/\s/g, '').toUpperCase();
+            const startIndex = jobMatch.index! + jobMatch[0].length;
+            const restOfString = processingText.substring(startIndex);
+            
+            let digits = '';
+            for (const char of restOfString) {
+                if (/\d/.test(char)) {
+                    digits += char;
+                    if (digits.length === 8) {
+                        break;
+                    }
+                }
+            }
+            
+            if (digits.length > 0) {
+                updatedData.Ma = jobPrefix + digits;
+            }
         }
         
         // 3. Extract Month from a date in dd/mm/yyyy format
@@ -300,6 +316,9 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
         } else {
             setStatus({ type: 'error', message: 'Không thể trích xuất dữ liệu. Vui lòng kiểm tra định dạng văn bản.' });
         }
+
+        // Clear the processing text area after handling
+        setProcessingText('');
     };
     
     const statusColor = {

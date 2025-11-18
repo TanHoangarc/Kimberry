@@ -19,7 +19,8 @@ interface MblPaymentContentProps {
   back: () => void;
 }
 
-const initialFormData = {
+// Fix: Explicitly type `initialFormData` to allow `soTien` to be `number | string`, fixing type inference issues.
+const initialFormData: { maLine: string; soTien: number | string; mbl: string } = {
     maLine: '',
     soTien: '',
     mbl: '',
@@ -40,6 +41,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     
     const [maLineOptions, setMaLineOptions] = useState<string[]>([]);
     const [newMaLine, setNewMaLine] = useState('');
+    const [isAddingMaLine, setIsAddingMaLine] = useState(false);
 
     useEffect(() => {
         try {
@@ -128,6 +130,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         setMaLineOptions(prev => [...prev, trimmedNewLine].sort());
         setNewMaLine('');
         setStatus({ type: 'success', message: `Đã thêm thành công Mã Line "${trimmedNewLine}".` });
+        setIsAddingMaLine(false);
     };
 
 
@@ -361,17 +364,34 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                 <option value="">--- Chọn Mã Line ---</option>
                                 {maLineOptions.map(line => <option key={line} value={line}>{line}</option>)}
                             </select>
-                            <input
-                                type="text"
-                                value={newMaLine}
-                                onChange={(e) => setNewMaLine(e.target.value)}
-                                placeholder="Thêm Mã Line mới..."
-                                className="p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddMaLine()}
-                            />
-                            <button onClick={handleAddMaLine} className="px-3 py-2 bg-indigo-500 text-white rounded-md text-sm hover:bg-indigo-600 transition-colors flex-shrink-0">
-                                + Thêm
-                            </button>
+                            
+                            {!isAddingMaLine ? (
+                                <button
+                                    onClick={() => setIsAddingMaLine(true)}
+                                    className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors flex-shrink-0"
+                                    title="Thêm Mã Line mới"
+                                    aria-label="Thêm Mã Line mới"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                            ) : (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={newMaLine}
+                                        onChange={(e) => setNewMaLine(e.target.value)}
+                                        placeholder="Thêm Mã Line mới..."
+                                        className="p-2 border rounded-md focus:ring-2 focus:ring-[#5c9ead] outline-none"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleAddMaLine()}
+                                        autoFocus
+                                    />
+                                    <button onClick={handleAddMaLine} className="px-3 py-2 bg-indigo-500 text-white rounded-md text-sm hover:bg-indigo-600 transition-colors flex-shrink-0">
+                                        + Thêm
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
