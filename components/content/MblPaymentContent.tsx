@@ -19,7 +19,8 @@ interface MblPaymentContentProps {
   back: () => void;
 }
 
-const initialFormData = {
+// Fix: Explicitly type `initialFormData` to allow `soTien` to be `number | string`, fixing type inference issues.
+const initialFormData: { maLine: string; soTien: number | string; mbl: string } = {
     maLine: '',
     soTien: '',
     mbl: '',
