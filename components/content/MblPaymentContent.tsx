@@ -51,7 +51,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     // Helper to fetch data from server
     const fetchRemoteData = async (): Promise<MblRemoteData | null> => {
         try {
-            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`);
+            // Add timestamp to bypass browser cache
+            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}&_t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
                 return data;
