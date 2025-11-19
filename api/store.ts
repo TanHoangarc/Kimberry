@@ -7,12 +7,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
-  const key = req.query.key as string || (req.body && req.body.key);
+  // Handle body parsing manually if needed (sometimes Vercel passes it as string)
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      // If parsing fails, body remains a string or whatever it was
+    }
+  }
+
+  const key = req.query.key as string || (body && body.key);
   // Allow passing a direct URL to bypass list() latency
   const directUrl = req.query.url as string;
 
   if (!key) {
-    return res.status(400).json({ error: 'Key is required' });
+    return res.status(400).json({ error: 'Key parameter is required (in query or body).' });
   }
 
   const filePath = `db/${key}.json`;
@@ -52,28 +62,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ data, url });
     } catch (error) {
       console.error('Store GET error:', error);
-      return res.status(500).json({ error: 'Failed to retrieve data' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return res.status(500).json({ error: 'Failed to retrieve data', details: errorMessage });
     }
   }
 
   // Handle POST request: Save data
   if (req.method === 'POST') {
     try {
-      const { data } = req.body;
+      if (!body) {
+          return res.status(400).json({ error: 'Request body is empty.' });
+      }
+
+      const data = body.data;
+      
+      if (data === undefined) {
+          return res.status(400).json({ error: 'Data field is missing in request body.' });
+      }
+
       // Overwrite the file with new data.
       // addRandomSuffix: false ensures the path remains consistent.
       const blob = await put(filePath, JSON.stringify(data), { 
         access: 'public', 
-        addRandomSuffix: false 
+        addRandomSuffix: false,
+        // Ensure content type is set correctly for the blob
+        contentType: 'application/json'
       });
       
       // Return success and the specific URL of the blob
       return res.status(200).json({ success: true, url: blob.url });
     } catch (error) {
       console.error('Store POST error:', error);
-      return res.status(500).json({ error: 'Failed to save data' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return res.status(500).json({ error: 'Failed to save data to Vercel Blob', details: errorMessage });
     }
   }
 
-  return res.status(405).json({ error: 'Method Not Allowed' });
+  return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
 }

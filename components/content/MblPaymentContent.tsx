@@ -80,11 +80,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     // Helper to save data to server
     const saveRemoteData = async (data: MblRemoteData) => {
         try {
-            const res = await fetch(STORE_API_ENDPOINT, {
+            // PASS key IN QUERY param to ensure it's always read correctly
+            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key: DATA_KEY, data })
+                body: JSON.stringify({ data })
             });
+            
             if (res.ok) {
                 const result = await res.json();
                 if (result.url) {
@@ -92,7 +94,9 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     localStorage.setItem(STORE_URL_KEY, result.url);
                 }
             } else {
-                 throw new Error('Save API returned error');
+                 // Try to parse error message from server
+                 const errData = await res.json().catch(() => ({}));
+                 throw new Error(errData.error || errData.details || 'Server returned an error during save.');
             }
         } catch (e) {
             console.error("Failed to save remote data", e);
@@ -189,7 +193,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setStatus({ type: 'success', message: `Đã thêm thành công Mã Line "${trimmedNewLine}".` });
             setIsAddingMaLine(false);
         } catch (err) {
-             setStatus({ type: 'error', message: 'Lỗi khi lưu Mã Line mới.' });
+             const error = err as Error;
+             setStatus({ type: 'error', message: `Lỗi khi lưu Mã Line mới: ${error.message}` });
         } finally {
             setIsLoadingData(false);
         }
@@ -219,7 +224,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             });
 
             const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Lỗi server');
+            if (!response.ok) throw new Error(result.error || 'Lỗi server upload file');
 
             const newEntry: MblPaymentData = {
                 id: Date.now().toString(),
@@ -292,7 +297,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
                  setStatus({ type: 'info', message: `Đã tải ${entryToLoad.mbl || entryToLoad.maLine} lên để chỉnh sửa. Vui lòng chọn lại file hóa đơn.` });
             } catch (e) {
-                setStatus({ type: 'error', message: 'Lỗi khi tải dữ liệu chỉnh sửa.' });
+                const error = e as Error;
+                setStatus({ type: 'error', message: `Lỗi khi tải dữ liệu chỉnh sửa: ${error.message}` });
             } finally {
                 setIsLoadingData(false);
             }

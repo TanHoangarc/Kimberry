@@ -52,18 +52,21 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
 
   const saveRemoteData = async (data: SubmissionData[]) => {
       try {
-          const res = await fetch(STORE_API_ENDPOINT, {
+          // PASS key IN QUERY param to ensure it's always read correctly
+          const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ key: DATA_KEY, data })
+              body: JSON.stringify({ data })
           });
+          
           if (res.ok) {
             const result = await res.json();
             if (result.url) {
                 localStorage.setItem(STORE_URL_KEY, result.url);
             }
           } else {
-              throw new Error('Failed to save to server');
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || errData.details || 'Failed to save to server');
           }
       } catch (e) {
           console.error("Failed to save submission data", e);
@@ -206,7 +209,8 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
           localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedData));
           window.dispatchEvent(new CustomEvent('pending_lists_updated'));
       } catch (e) {
-          alert("Không thể xóa mục. Lỗi kết nối.");
+          const error = e as Error;
+          alert(`Không thể xóa mục. Lỗi: ${error.message}`);
       } finally {
           setIsUploading(false);
       }
