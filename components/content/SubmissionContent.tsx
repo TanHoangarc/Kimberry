@@ -6,27 +6,90 @@ interface SubmissionContentProps {
   back: () => void;
 }
 
-// The new endpoint for our Vercel Serverless Function
 const UPLOAD_API_ENDPOINT = '/api/upload';
-const SUBMISSION_STORAGE_KEY = 'kimberry-refund-submissions';
+const STORE_API_ENDPOINT = '/api/store';
+const DATA_KEY = 'kimberry_submission_data';
+const STORE_URL_KEY = 'kimberry_submission_store_url';
+const LOCAL_MIRROR_KEY = 'kimberry-refund-submissions'; // LocalStorage mirror key
 
 const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   const [jobId, setJobId] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string, url?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
   const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
 
-  useEffect(() => {
-    try {
-      const savedSubmissions = localStorage.getItem(SUBMISSION_STORAGE_KEY);
-      if (savedSubmissions) {
-        setSubmissions(JSON.parse(savedSubmissions));
-      }
+  // --- Helper Functions for Cloud Sync ---
 
+  const fetchRemoteData = async (): Promise<SubmissionData[] | null> => {
+      try {
+          const cachedUrl = localStorage.getItem(STORE_URL_KEY);
+          let apiUrl = `${STORE_API_ENDPOINT}?key=${DATA_KEY}`;
+          if (cachedUrl) {
+              apiUrl += `&url=${encodeURIComponent(cachedUrl)}`;
+          }
+
+          const res = await fetch(`${apiUrl}&_t=${Date.now()}`);
+          if (res.ok) {
+              const responseJson = await res.json();
+              const { data, url } = responseJson;
+              if (url) {
+                  localStorage.setItem(STORE_URL_KEY, url);
+              }
+              // Ensure data is array
+              if (Array.isArray(data)) return data;
+              return data ? [] : null;
+          }
+      } catch (e) {
+          console.error("Failed to fetch submission data", e);
+      }
+      return null;
+  };
+
+  const saveRemoteData = async (data: SubmissionData[]) => {
+      try {
+          const res = await fetch(STORE_API_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key: DATA_KEY, data })
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.url) {
+                localStorage.setItem(STORE_URL_KEY, result.url);
+            }
+          } else {
+              throw new Error('Failed to save to server');
+          }
+      } catch (e) {
+          console.error("Failed to save submission data", e);
+          throw e;
+      }
+  };
+
+  const refreshData = async () => {
+      setIsLoadingData(true);
+      const data = await fetchRemoteData();
+      if (data) {
+          setSubmissions(data);
+          // Mirror to local storage
+          localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(data));
+          window.dispatchEvent(new CustomEvent('pending_lists_updated'));
+      }
+      setIsLoadingData(false);
+  };
+  // ---------------------------------------
+
+  useEffect(() => {
+    // Initial Data Load
+    refreshData();
+
+    // User Role Logic
+    try {
       const userEmailRaw = localStorage.getItem('user');
       const allUsersRaw = localStorage.getItem('users');
       if (userEmailRaw && allUsersRaw) {
@@ -41,18 +104,9 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to load data from localStorage", error);
+      console.error("Failed to load user role", error);
     }
   }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SUBMISSION_STORAGE_KEY, JSON.stringify(submissions));
-      window.dispatchEvent(new CustomEvent('pending_lists_updated'));
-    } catch (error) {
-      console.error("Failed to save submission data to localStorage", error);
-    }
-  }, [submissions]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -74,37 +128,41 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     const searchParams = new URLSearchParams({
         jobId: jobId,
         filename: selectedFile.name,
-        uploadPath: 'CVHC' // Direct files to the CVHC folder
+        uploadPath: 'CVHC'
     });
 
     try {
+      // 1. Upload File
       const response = await fetch(`${UPLOAD_API_ENDPOINT}?${searchParams.toString()}`, {
         method: 'POST',
-        body: selectedFile, // The raw file is sent as the body
+        body: selectedFile,
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        let errorMessage = result.error || 'Có lỗi xảy ra khi tải file.';
-        if (result.details) {
-          // Append details from server for better debugging
-          errorMessage += ` (Chi tiết: ${result.details})`;
-        }
-        throw new Error(errorMessage);
+        throw new Error(result.error || 'Có lỗi xảy ra khi tải file.');
       }
       
-      if (response.ok && selectedFile) {
-        const newSubmission: SubmissionData = {
-          id: Date.now().toString(),
-          hbl: jobId,
-          fileUrl: result.url,
-          fileName: selectedFile.name,
-        };
-        setSubmissions(prev => [newSubmission, ...prev]);
-      }
+      // 2. Update Data List
+      const newSubmission: SubmissionData = {
+        id: Date.now().toString(),
+        hbl: jobId,
+        fileUrl: result.url,
+        fileName: selectedFile.name,
+      };
+
+      // Fetch latest before append
+      const currentData = await fetchRemoteData() || [];
+      const updatedData = [newSubmission, ...currentData];
       
-      // --- Create Notification ---
+      await saveRemoteData(updatedData);
+      
+      setSubmissions(updatedData);
+      localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedData));
+      window.dispatchEvent(new CustomEvent('pending_lists_updated'));
+      
+      // --- Notification ---
       const userRaw = localStorage.getItem('user');
       if (userRaw) {
         const currentUser: Partial<User> = JSON.parse(userRaw);
@@ -114,7 +172,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
           details: `HBL: ${jobId}`
         });
       }
-      // -------------------------
+      // -------------------
 
       setUploadStatus({ 
         type: 'success', 
@@ -136,9 +194,22 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     }
   };
   
-  const handleCompleteSubmission = (idToComplete: string) => {
+  const handleCompleteSubmission = async (idToComplete: string) => {
     if (window.confirm('Bạn có chắc chắn muốn hoàn thành và xóa mục này?')) {
-      setSubmissions(prev => prev.filter(submission => submission.id !== idToComplete));
+      setIsUploading(true); // reuse loading state
+      try {
+          const currentData = await fetchRemoteData() || [];
+          const updatedData = currentData.filter(sub => sub.id !== idToComplete);
+          await saveRemoteData(updatedData);
+          
+          setSubmissions(updatedData);
+          localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedData));
+          window.dispatchEvent(new CustomEvent('pending_lists_updated'));
+      } catch (e) {
+          alert("Không thể xóa mục. Lỗi kết nối.");
+      } finally {
+          setIsUploading(false);
+      }
     }
   };
 
@@ -152,7 +223,18 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
 
   return (
     <div>
-      <p className="mb-4">Nộp hồ sơ hoàn cược. Vui lòng điền đúng thông tin số HBL có dạng KML.... và tải lên file của bạn.</p>
+        <div className="flex justify-between items-center mb-4">
+            <p>Nộp hồ sơ hoàn cược. Vui lòng điền đúng thông tin số HBL có dạng KML.... và tải lên file của bạn.</p>
+            <button 
+                onClick={refreshData} 
+                disabled={isLoadingData}
+                className="flex items-center gap-2 px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition-colors"
+            >
+                <span className={`${isLoadingData ? 'animate-spin' : ''}`}>🔄</span>
+                {isLoadingData ? 'Đang tải...' : 'Làm mới'}
+            </button>
+        </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="jobId" className="block text-sm font-medium text-gray-700 mb-1">
@@ -207,7 +289,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
               disabled={isUploading}
               className="px-6 py-2 bg-[#184d47] text-white border-none rounded-md cursor-pointer hover:bg-opacity-80 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isUploading ? 'Đang nộp...' : 'Nộp hồ sơ'}
+              {isUploading ? 'Đang xử lý...' : 'Nộp hồ sơ'}
             </button>
         </div>
       </form>
@@ -243,7 +325,8 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
                       <td className="p-3 text-right">
                         <button 
                           onClick={() => handleCompleteSubmission(sub.id)}
-                          className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors"
+                          disabled={isUploading}
+                          className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400"
                         >
                           Hoàn thành
                         </button>

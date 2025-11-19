@@ -6,6 +6,8 @@ import { addNotification } from '../../utils/notifications';
 const UPLOAD_API_ENDPOINT = '/api/upload';
 const STORE_API_ENDPOINT = '/api/store';
 const DATA_KEY = 'mbl_full_data';
+const STORE_URL_KEY = 'kimberry_mbl_store_url'; // LocalStorage key to cache the Blob URL
+const LOCAL_MIRROR_KEY = 'kimberry-mbl-payment-data'; // To keep Header badge working
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
@@ -23,7 +25,6 @@ interface MblPaymentContentProps {
   back: () => void;
 }
 
-// Fix: Explicitly type `initialFormData` to allow `soTien` to be `number | string`, fixing type inference issues.
 const initialFormData: { maLine: string; soTien: number | string; mbl: string } = {
     maLine: '',
     soTien: '',
@@ -51,10 +52,23 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     // Helper to fetch data from server
     const fetchRemoteData = async (): Promise<MblRemoteData | null> => {
         try {
-            // Add timestamp to bypass browser cache
-            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}&_t=${Date.now()}`);
+            // 1. Try to get the cached URL hint from local storage
+            const cachedUrl = localStorage.getItem(STORE_URL_KEY);
+            let apiUrl = `${STORE_API_ENDPOINT}?key=${DATA_KEY}`;
+            if (cachedUrl) {
+                apiUrl += `&url=${encodeURIComponent(cachedUrl)}`;
+            }
+
+            // 2. Call API with cache busting
+            const res = await fetch(`${apiUrl}&_t=${Date.now()}`);
             if (res.ok) {
-                const data = await res.json();
+                const responseJson = await res.json();
+                // The API now returns { data: ..., url: ... }
+                const { data, url } = responseJson;
+
+                if (url) {
+                    localStorage.setItem(STORE_URL_KEY, url);
+                }
                 return data;
             }
         } catch (e) {
@@ -66,11 +80,20 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     // Helper to save data to server
     const saveRemoteData = async (data: MblRemoteData) => {
         try {
-            await fetch(STORE_API_ENDPOINT, {
+            const res = await fetch(STORE_API_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key: DATA_KEY, data })
             });
+            if (res.ok) {
+                const result = await res.json();
+                if (result.url) {
+                    // Cache the new URL immediately so next fetch finds it
+                    localStorage.setItem(STORE_URL_KEY, result.url);
+                }
+            } else {
+                 throw new Error('Save API returned error');
+            }
         } catch (e) {
             console.error("Failed to save remote data", e);
             throw e; // Re-throw to handle in UI
@@ -84,6 +107,10 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setEntries(data.pending || []);
             setCompletedEntries(data.completed || []);
             setMaLineOptions(data.options && data.options.length > 0 ? data.options : DEFAULT_MA_LINE_OPTIONS);
+            
+            // Mirror to local storage for Header Badges
+            localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(data.pending || []));
+            window.dispatchEvent(new CustomEvent('pending_lists_updated'));
         } else {
             // Initialize if empty
              setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
@@ -95,7 +122,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         // Initial load
         refreshData();
 
-        // User Role Logic (Local Storage is fine for this)
+        // User Role Logic
         try {
             const userEmailRaw = localStorage.getItem('user');
             const allUsersRaw = localStorage.getItem('users');
@@ -203,6 +230,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             };
             
             // 2. Update Database (Fetch -> Append -> Save)
+            // Always fetch fresh data before appending to minimize conflicts
             const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
             const updatedPending = [...(currentData.pending || []), newEntry];
             
@@ -213,6 +241,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
             // 3. Update UI
             setEntries(updatedPending);
+            localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedPending));
+            window.dispatchEvent(new CustomEvent('pending_lists_updated'));
             
             const userRaw = localStorage.getItem('user');
             if (userRaw) {
@@ -238,7 +268,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     };
 
     const handleLoadForEditing = async (idToLoad: string) => {
-        // We allow editing from the local state for UX speed, but syncing back will handle the update
         const entryToLoad = entries.find(entry => entry.id === idToLoad);
         if (entryToLoad) {
             const { maLine, soTien, mbl } = entryToLoad;
@@ -249,16 +278,18 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 fileInputRef.current.value = '';
             }
             
-            // Temporarily remove from local UI to avoid confusion, but real deletion happens on 'save'
-            // Actually, for this flow, we should ideally delete it from server now or wait?
-            // To be safe: We delete it from the list so it's not duplicated when they click "Add" again.
-            
             setIsLoadingData(true);
             try {
+                 // Remove from server to avoid duplicates
                  const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
                  const updatedPending = currentData.pending.filter(e => e.id !== idToLoad);
+                 
                  await saveRemoteData({ ...currentData, pending: updatedPending });
+                 
                  setEntries(updatedPending);
+                 localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedPending));
+                 window.dispatchEvent(new CustomEvent('pending_lists_updated'));
+
                  setStatus({ type: 'info', message: `Đã tải ${entryToLoad.mbl || entryToLoad.maLine} lên để chỉnh sửa. Vui lòng chọn lại file hóa đơn.` });
             } catch (e) {
                 setStatus({ type: 'error', message: 'Lỗi khi tải dữ liệu chỉnh sửa.' });
@@ -331,6 +362,10 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             // 3. Update UI
             setEntries(updatedPending);
             setCompletedEntries(updatedCompleted);
+            
+            localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedPending));
+            window.dispatchEvent(new CustomEvent('pending_lists_updated'));
+
             setStatus({ type: 'success', message: `Đã hoàn thành thanh toán cho Mã Line "${originalEntry.maLine}".` });
 
         } catch (error) {
@@ -359,8 +394,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 });
 
                 if (!response.ok) {
-                    const errorResult = await response.json();
-                    throw new Error(errorResult.error || 'Lỗi server khi xóa file.');
+                    // Don't throw here, just warn, as we still want to remove the record
+                    console.warn("Could not delete file blob", await response.json());
                 }
             }
             
@@ -432,7 +467,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             
             <div className="flex justify-between items-center">
                 <p className="text-sm text-gray-500 italic">
-                    Dữ liệu thanh toán MBL được đồng bộ hóa trên hệ thống.
+                    Dữ liệu thanh toán MBL được đồng bộ hóa trên hệ thống đám mây.
                 </p>
                 <button 
                     onClick={refreshData} 
