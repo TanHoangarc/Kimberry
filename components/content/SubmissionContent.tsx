@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { addNotification } from '../../utils/notifications';
 import { User, SubmissionData } from '../../types';
@@ -10,7 +11,8 @@ const UPLOAD_API_ENDPOINT = '/api/upload';
 const STORE_API_ENDPOINT = '/api/store';
 const DATA_KEY = 'kimberry_submission_data';
 const STORE_URL_KEY = 'kimberry_submission_store_url';
-const LOCAL_MIRROR_KEY = 'kimberry-refund-submissions'; // LocalStorage mirror key
+const LOCAL_MIRROR_KEY = 'kimberry-refund-submissions';
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 
 const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   const [jobId, setJobId] = useState('');
@@ -40,19 +42,20 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
               if (url) {
                   localStorage.setItem(STORE_URL_KEY, url);
               }
-              // Ensure data is array
               if (Array.isArray(data)) return data;
               return data ? [] : null;
+          } else {
+             console.warn("Fetch submission data failed:", res.status);
+             return null;
           }
       } catch (e) {
           console.error("Failed to fetch submission data", e);
+          return null;
       }
-      return null;
   };
 
   const saveRemoteData = async (data: SubmissionData[]) => {
       try {
-          // PASS key IN QUERY param to ensure it's always read correctly
           const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -65,8 +68,21 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
                 localStorage.setItem(STORE_URL_KEY, result.url);
             }
           } else {
-              const errData = await res.json().catch(() => ({}));
-              throw new Error(errData.error || errData.details || 'Failed to save to server');
+              let errorMsg = `Lỗi ${res.status} (${res.statusText})`;
+              try {
+                 const contentType = res.headers.get("content-type");
+                 if (contentType && contentType.indexOf("application/json") !== -1) {
+                     const errData = await res.json();
+                     if (errData.error) errorMsg += `: ${errData.error}`;
+                     if (errData.details) errorMsg += ` - ${errData.details}`;
+                 } else {
+                     const text = await res.text();
+                     if (text) errorMsg += `: ${text.substring(0, 100)}...`;
+                 }
+              } catch (e) {
+                 // Ignore
+              }
+              throw new Error(errorMsg);
           }
       } catch (e) {
           console.error("Failed to save submission data", e);
@@ -79,7 +95,6 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
       const data = await fetchRemoteData();
       if (data) {
           setSubmissions(data);
-          // Mirror to local storage
           localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(data));
           window.dispatchEvent(new CustomEvent('pending_lists_updated'));
       }
@@ -88,10 +103,8 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   // ---------------------------------------
 
   useEffect(() => {
-    // Initial Data Load
     refreshData();
 
-    // User Role Logic
     try {
       const userEmailRaw = localStorage.getItem('user');
       const allUsersRaw = localStorage.getItem('users');
@@ -113,7 +126,14 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+          setUploadStatus({ type: 'error', message: 'File quá lớn (> 4MB). Vui lòng chọn file nhỏ hơn.' });
+          event.target.value = ''; 
+          setSelectedFile(null);
+          return;
+      }
+      setSelectedFile(file);
       setUploadStatus(null);
     }
   };
@@ -126,7 +146,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     }
 
     setIsUploading(true);
-    setUploadStatus({ type: 'info', message: 'Đang tải file lên hệ thống...' });
+    setUploadStatus({ type: 'info', message: 'B1: Đang tải file lên hệ thống...' });
 
     const searchParams = new URLSearchParams({
         jobId: jobId,
@@ -135,19 +155,20 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     });
 
     try {
-      // 1. Upload File
+      // 1. Upload
       const response = await fetch(`${UPLOAD_API_ENDPOINT}?${searchParams.toString()}`, {
         method: 'POST',
         body: selectedFile,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || 'Có lỗi xảy ra khi tải file.');
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || result.details || `Lỗi upload (Status: ${response.status})`);
       }
+      const result = await response.json();
       
-      // 2. Update Data List
+      setUploadStatus({ type: 'info', message: 'B2: Tải file xong. Đang lưu dữ liệu...' });
+
       const newSubmission: SubmissionData = {
         id: Date.now().toString(),
         hbl: jobId,
@@ -155,9 +176,16 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
         fileName: selectedFile.name,
       };
 
-      // Fetch latest before append
-      const currentData = await fetchRemoteData() || [];
-      const updatedData = [newSubmission, ...currentData];
+      // 2. Update DB
+      const currentData = await fetchRemoteData();
+      // CRITICAL: Do not proceed if data fetch fails
+      // Note: empty array is valid, null is error
+      if (currentData === null) {
+           throw new Error("Không thể lấy dữ liệu hiện tại. Vui lòng thử lại.");
+      }
+      
+      const validData = currentData || [];
+      const updatedData = [newSubmission, ...validData];
       
       await saveRemoteData(updatedData);
       
@@ -165,7 +193,6 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
       localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedData));
       window.dispatchEvent(new CustomEvent('pending_lists_updated'));
       
-      // --- Notification ---
       const userRaw = localStorage.getItem('user');
       if (userRaw) {
         const currentUser: Partial<User> = JSON.parse(userRaw);
@@ -175,7 +202,6 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
           details: `HBL: ${jobId}`
         });
       }
-      // -------------------
 
       setUploadStatus({ 
         type: 'success', 
@@ -191,7 +217,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
     } catch (error) {
         const err = error as Error;
         console.error('Upload error:', err);
-        setUploadStatus({ type: 'error', message: `Tải file thất bại: ${err.message}` });
+        setUploadStatus({ type: 'error', message: `Thất bại: ${err.message}` });
     } finally {
       setIsUploading(false);
     }
@@ -199,9 +225,11 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   
   const handleCompleteSubmission = async (idToComplete: string) => {
     if (window.confirm('Bạn có chắc chắn muốn hoàn thành và xóa mục này?')) {
-      setIsUploading(true); // reuse loading state
+      setIsUploading(true); 
       try {
-          const currentData = await fetchRemoteData() || [];
+          const currentData = await fetchRemoteData();
+          if (!currentData) throw new Error("Mất kết nối với dữ liệu server.");
+
           const updatedData = currentData.filter(sub => sub.id !== idToComplete);
           await saveRemoteData(updatedData);
           
@@ -256,7 +284,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
         </div>
         <div>
           <label htmlFor="fileUpload" className="block text-sm font-medium text-gray-700 mb-1">
-            Chọn File
+            Chọn File (Tối đa 4MB)
           </label>
           <input
             type="file"

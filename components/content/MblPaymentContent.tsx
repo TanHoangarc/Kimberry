@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { MblPaymentData, User } from '../../types';
 import { addNotification } from '../../utils/notifications';
@@ -6,8 +7,9 @@ import { addNotification } from '../../utils/notifications';
 const UPLOAD_API_ENDPOINT = '/api/upload';
 const STORE_API_ENDPOINT = '/api/store';
 const DATA_KEY = 'mbl_full_data';
-const STORE_URL_KEY = 'kimberry_mbl_store_url'; // LocalStorage key to cache the Blob URL
-const LOCAL_MIRROR_KEY = 'kimberry-mbl-payment-data'; // To keep Header badge working
+const STORE_URL_KEY = 'kimberry_mbl_store_url'; 
+const LOCAL_MIRROR_KEY = 'kimberry-mbl-payment-data';
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
@@ -52,35 +54,33 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     // Helper to fetch data from server
     const fetchRemoteData = async (): Promise<MblRemoteData | null> => {
         try {
-            // 1. Try to get the cached URL hint from local storage
             const cachedUrl = localStorage.getItem(STORE_URL_KEY);
             let apiUrl = `${STORE_API_ENDPOINT}?key=${DATA_KEY}`;
             if (cachedUrl) {
                 apiUrl += `&url=${encodeURIComponent(cachedUrl)}`;
             }
 
-            // 2. Call API with cache busting
             const res = await fetch(`${apiUrl}&_t=${Date.now()}`);
             if (res.ok) {
                 const responseJson = await res.json();
-                // The API now returns { data: ..., url: ... }
                 const { data, url } = responseJson;
 
                 if (url) {
                     localStorage.setItem(STORE_URL_KEY, url);
                 }
                 return data;
+            } else {
+                console.warn("Fetch data returned non-200 status:", res.status);
+                return null;
             }
         } catch (e) {
             console.error("Failed to fetch remote data", e);
+            return null;
         }
-        return null;
     };
 
-    // Helper to save data to server
     const saveRemoteData = async (data: MblRemoteData) => {
         try {
-            // PASS key IN QUERY param to ensure it's always read correctly
             const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -90,17 +90,28 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             if (res.ok) {
                 const result = await res.json();
                 if (result.url) {
-                    // Cache the new URL immediately so next fetch finds it
                     localStorage.setItem(STORE_URL_KEY, result.url);
                 }
             } else {
-                 // Try to parse error message from server
-                 const errData = await res.json().catch(() => ({}));
-                 throw new Error(errData.error || errData.details || 'Server returned an error during save.');
+                 let errorMsg = `Lỗi ${res.status} (${res.statusText})`;
+                 try {
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const errData = await res.json();
+                        if (errData.error) errorMsg += `: ${errData.error}`;
+                        if (errData.details) errorMsg += ` - ${errData.details}`;
+                    } else {
+                        const text = await res.text();
+                        if (text) errorMsg += `: ${text.substring(0, 100)}...`;
+                    }
+                 } catch (e) {
+                    // Ignore parsing error
+                 }
+                 throw new Error(errorMsg);
             }
         } catch (e) {
             console.error("Failed to save remote data", e);
-            throw e; // Re-throw to handle in UI
+            throw e;
         }
     };
 
@@ -112,21 +123,19 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setCompletedEntries(data.completed || []);
             setMaLineOptions(data.options && data.options.length > 0 ? data.options : DEFAULT_MA_LINE_OPTIONS);
             
-            // Mirror to local storage for Header Badges
             localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(data.pending || []));
             window.dispatchEvent(new CustomEvent('pending_lists_updated'));
         } else {
-            // Initialize if empty
-             setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
+             // Only reset if we strictly can't load, but keep existing if network fail? 
+             // Ideally we warn user. For now, we keep defaults or empty.
+             // setMaLineOptions(DEFAULT_MA_LINE_OPTIONS); 
         }
         setIsLoadingData(false);
     };
 
     useEffect(() => {
-        // Initial load
         refreshData();
 
-        // User Role Logic
         try {
             const userEmailRaw = localStorage.getItem('user');
             const allUsersRaw = localStorage.getItem('users');
@@ -149,7 +158,15 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
-            setSelectedFile(event.target.files[0]);
+            const file = event.target.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                setStatus({ type: 'error', message: 'File quá lớn (> 4MB). Vui lòng chọn file nhỏ hơn.' });
+                event.target.value = '';
+                setSelectedFile(null);
+                return;
+            }
+            setSelectedFile(file);
+            setStatus(null);
         }
     };
 
@@ -172,8 +189,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         
         setIsLoadingData(true);
         try {
-            // Fetch latest data to avoid race conditions
-            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const currentData = await fetchRemoteData();
+            if (!currentData) throw new Error("Không thể tải dữ liệu hiện tại. Vui lòng thử lại.");
             
             if (currentData.options.some(option => option.toLowerCase() === trimmedNewLine.toLowerCase())) {
                 setStatus({ type: 'error', message: `Mã Line "${trimmedNewLine}" đã tồn tại.` });
@@ -208,7 +225,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
 
         setIsUploading(true);
-        setStatus({ type: 'info', message: 'Đang tải hóa đơn và lưu thông tin...' });
+        setStatus({ type: 'info', message: 'Đang tải hóa đơn...' });
 
         const searchParams = new URLSearchParams({
             jobId: `MBL-${formData.maLine}-${Date.now()}`,
@@ -223,9 +240,15 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 body: selectedFile,
             });
 
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.error || result.details || 'Lỗi server upload file');
+            }
             const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Lỗi server upload file');
 
+            setStatus({ type: 'info', message: 'Đã tải hóa đơn. Đang lưu dữ liệu...' });
+
+            // 2. Save Data
             const newEntry: MblPaymentData = {
                 id: Date.now().toString(),
                 ...formData,
@@ -234,9 +257,12 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 hoaDonFilename: selectedFile.name,
             };
             
-            // 2. Update Database (Fetch -> Append -> Save)
-            // Always fetch fresh data before appending to minimize conflicts
-            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const currentData = await fetchRemoteData();
+            // CRITICAL: If we can't read DB, DO NOT overwrite.
+            if (!currentData) {
+                throw new Error("Mất kết nối với cơ sở dữ liệu. Dữ liệu chưa được lưu. Vui lòng thử lại.");
+            }
+            
             const updatedPending = [...(currentData.pending || []), newEntry];
             
             await saveRemoteData({
@@ -244,7 +270,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 pending: updatedPending
             });
 
-            // 3. Update UI
             setEntries(updatedPending);
             localStorage.setItem(LOCAL_MIRROR_KEY, JSON.stringify(updatedPending));
             window.dispatchEvent(new CustomEvent('pending_lists_updated'));
@@ -266,7 +291,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
         } catch (error) {
             const err = error as Error;
-            setStatus({ type: 'error', message: `Thêm thất bại: ${err.message}` });
+            setStatus({ type: 'error', message: `Thất bại: ${err.message}` });
         } finally {
             setIsUploading(false);
         }
@@ -285,8 +310,9 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             
             setIsLoadingData(true);
             try {
-                 // Remove from server to avoid duplicates
-                 const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+                 const currentData = await fetchRemoteData();
+                 if (!currentData) throw new Error("Không thể tải dữ liệu từ server.");
+
                  const updatedPending = currentData.pending.filter(e => e.id !== idToLoad);
                  
                  await saveRemoteData({ ...currentData, pending: updatedPending });
@@ -327,9 +353,15 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setCompletingEntryId(null);
             return;
         }
+
+        if (uncFile.size > MAX_FILE_SIZE) {
+             setStatus({ type: 'error', message: 'File UNC quá lớn (> 4MB). Vui lòng nén nhỏ lại.' });
+             setCompletingEntryId(null);
+             return;
+        }
         
         setIsUploading(true);
-        setStatus({ type: 'info', message: `Đang tải file UNC cho Mã Line ${originalEntry.maLine}...` });
+        setStatus({ type: 'info', message: `B1: Đang tải file UNC lên Server...` });
 
         const searchParams = new URLSearchParams({
             jobId: `DONE-${originalEntry.maLine}-${originalEntry.id}`,
@@ -344,8 +376,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 body: uncFile,
             });
 
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.error || result.details || `Lỗi upload (Status: ${response.status})`);
+            }
             const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Lỗi server khi tải UNC.');
+            
+            setStatus({ type: 'info', message: `B2: Đã tải file xong. Đang cập nhật dữ liệu...` });
 
             const completedEntry: MblPaymentData = {
                 ...originalEntry,
@@ -354,7 +391,11 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             };
 
             // 2. Update DB
-            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const currentData = await fetchRemoteData();
+            // CRITICAL: If fetch fails, DO NOT proceed, otherwise we wipe the DB.
+            if (!currentData) {
+                 throw new Error("File đã lên nhưng KHÔNG THỂ LƯU dữ liệu vào hệ thống. Vui lòng thử lại sau giây lát.");
+            }
             
             const updatedPending = currentData.pending.filter(entry => entry.id !== completingEntryId);
             const updatedCompleted = [...currentData.completed, completedEntry];
@@ -365,7 +406,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 completed: updatedCompleted
             });
 
-            // 3. Update UI
             setEntries(updatedPending);
             setCompletedEntries(updatedCompleted);
             
@@ -376,7 +416,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
 
         } catch (error) {
             const err = error as Error;
-            setStatus({ type: 'error', message: `Hoàn thành thất bại: ${err.message}` });
+            setStatus({ type: 'error', message: `Thất bại: ${err.message}` });
         } finally {
             setIsUploading(false);
             setCompletingEntryId(null);
@@ -400,13 +440,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 });
 
                 if (!response.ok) {
-                    // Don't throw here, just warn, as we still want to remove the record
                     console.warn("Could not delete file blob", await response.json());
                 }
             }
             
-            // Update DB
-            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const currentData = await fetchRemoteData();
+            if (!currentData) throw new Error("Không thể đồng bộ dữ liệu xóa.");
+
             const updatedCompleted = currentData.completed.filter(entry => entry.id !== entryToDelete.id);
             await saveRemoteData({ ...currentData, completed: updatedCompleted });
 

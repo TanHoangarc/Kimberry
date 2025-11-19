@@ -1,38 +1,47 @@
+
 import { put, list } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CRITICAL: Prevent Vercel Edge/Browser caching of this API response
+  // Ensure CORS headers to prevent browser blocking on some network configs
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Prevent Caching
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
-  // Handle body parsing manually if needed (sometimes Vercel passes it as string)
+  // Robust Body Parsing
   let body = req.body;
   if (typeof body === 'string') {
     try {
       body = JSON.parse(body);
     } catch (e) {
-      // If parsing fails, body remains a string or whatever it was
+      console.error('JSON Parse Error in Store API:', e);
     }
   }
 
-  const key = req.query.key as string || (body && body.key);
-  // Allow passing a direct URL to bypass list() latency
+  const key = req.query.key as string || (body && typeof body === 'object' && body.key);
   const directUrl = req.query.url as string;
 
   if (!key) {
-    return res.status(400).json({ error: 'Key parameter is required (in query or body).' });
+    return res.status(400).json({ error: 'Missing "key" parameter.' });
   }
 
   const filePath = `db/${key}.json`;
 
-  // Handle GET request: Retrieve data
+  // --- GET ---
   if (req.method === 'GET') {
     try {
       let url = directUrl;
       
-      // If no direct URL provided, try to find it via listing
       if (!url) {
         const { blobs } = await list({ prefix: filePath, limit: 1 });
         if (blobs.length > 0) {
@@ -41,12 +50,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (!url) {
-        // No file found
         return res.status(200).json({ data: null, url: null }); 
       }
 
-      // CRITICAL: Add a timestamp query param to the blob URL fetch.
-      // This forces the internal fetch to bypass the CDN cache and get the latest file.
       const response = await fetch(`${url}?t=${Date.now()}`, { 
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' }
@@ -57,44 +63,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       
       const data = await response.json();
-      
-      // Return both data and the URL so the client can cache the URL for next time
       return res.status(200).json({ data, url });
+
     } catch (error) {
-      console.error('Store GET error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return res.status(500).json({ error: 'Failed to retrieve data', details: errorMessage });
     }
   }
 
-  // Handle POST request: Save data
+  // --- POST ---
   if (req.method === 'POST') {
     try {
-      if (!body) {
-          return res.status(400).json({ error: 'Request body is empty.' });
+      if (!body || typeof body !== 'object') {
+          return res.status(400).json({ error: 'Invalid JSON body.' });
       }
 
       const data = body.data;
-      
       if (data === undefined) {
-          return res.status(400).json({ error: 'Data field is missing in request body.' });
+          return res.status(400).json({ error: 'Missing "data" field.' });
       }
 
-      // Overwrite the file with new data.
-      // addRandomSuffix: false ensures the path remains consistent.
       const blob = await put(filePath, JSON.stringify(data), { 
         access: 'public', 
         addRandomSuffix: false,
-        // Ensure content type is set correctly for the blob
         contentType: 'application/json'
       });
       
-      // Return success and the specific URL of the blob
       return res.status(200).json({ success: true, url: blob.url });
+
     } catch (error) {
       console.error('Store POST error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      return res.status(500).json({ error: 'Failed to save data to Vercel Blob', details: errorMessage });
+      return res.status(500).json({ error: 'Failed to save data', details: errorMessage });
     }
   }
 
