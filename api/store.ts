@@ -86,7 +86,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const blob = await put(filePath, JSON.stringify(data), { 
         access: 'public', 
         addRandomSuffix: false,
-        contentType: 'application/json'
+        contentType: 'application/json',
+        // @ts-ignore: Vercel Blob requires this specific flag to overwrite existing files when addRandomSuffix is false
+        allowOverwrite: true
       });
       
       return res.status(200).json({ success: true, url: blob.url });
