@@ -454,7 +454,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                         </thead>
                         <tbody>
                             {jobEntries.map((job, index) => (
-                                <tr key={index} className="border-b hover:bg-gray-50">
+                                <tr key={job.Ma || index} className="border-b hover:bg-gray-50">
                                     {formFields.map(f => (
                                         <td key={f.name} className="p-2 whitespace-nowrap">
                                             {typeof job[f.name] === 'number' ? (job[f.name] as number).toLocaleString('en-US') : (job[f.name] || '-')}

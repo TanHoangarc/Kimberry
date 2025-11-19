@@ -31,10 +31,13 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
       const allUsersRaw = localStorage.getItem('users');
       if (userEmailRaw && allUsersRaw) {
         const loggedInUserEmail = JSON.parse(userEmailRaw).email;
-        const allUsers: User[] = JSON.parse(allUsersRaw);
-        const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
-        if (currentUser) {
-          setUserRole(currentUser.role);
+        const parsedUsers = JSON.parse(allUsersRaw);
+        if (Array.isArray(parsedUsers)) {
+          const allUsers: User[] = parsedUsers;
+          const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
+          if (currentUser) {
+            setUserRole(currentUser.role);
+          }
         }
       }
     } catch (error) {

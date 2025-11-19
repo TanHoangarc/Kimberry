@@ -10,8 +10,13 @@ const AdminPanelContent: React.FC<AdminPanelContentProps> = ({ back }) => {
   const adminEmail = 'tanhoangarc@gmail.com';
 
   useEffect(() => {
-    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    setUsers(storedUsers);
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      setUsers(storedUsers);
+    } catch (error) {
+      console.error("Failed to parse user data in Admin Panel:", error);
+      setUsers([]); // Fallback to an empty list on error
+    }
   }, []);
 
   const handleRoleChange = (email: string, newRole: 'Admin' | 'Document' | 'Customer') => {

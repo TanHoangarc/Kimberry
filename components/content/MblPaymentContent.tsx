@@ -4,9 +4,8 @@ import { addNotification } from '../../utils/notifications';
 
 
 const UPLOAD_API_ENDPOINT = '/api/upload';
-const PENDING_STORAGE_KEY = 'kimberry-mbl-payment-data';
-const COMPLETED_STORAGE_KEY = 'kimberry-mbl-completed-payment-data';
-const MA_LINE_STORAGE_KEY = 'kimberry-ma-line-options';
+const STORE_API_ENDPOINT = '/api/store';
+const DATA_KEY = 'mbl_full_data';
 
 const DEFAULT_MA_LINE_OPTIONS = [
     'EVERGREEN', 'ONE', 'WANHAI', 'COSCO', 'COSCO-HP', 'TSLHN', 'SITC', 'AEC',
@@ -14,6 +13,11 @@ const DEFAULT_MA_LINE_OPTIONS = [
     'RCL', 'OOCL', 'CMACGM', 'MARINE-HP', 'SINOVITRANS', 'SNVT-HP', 'HAPAG-LLOYD'
 ].sort();
 
+interface MblRemoteData {
+    pending: MblPaymentData[];
+    completed: MblPaymentData[];
+    options: string[];
+}
 
 interface MblPaymentContentProps {
   back: () => void;
@@ -33,73 +37,83 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     const [completedEntries, setCompletedEntries] = useState<MblPaymentData[]>([]);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(false);
     const [completingEntryId, setCompletingEntryId] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uncFileRef = useRef<HTMLInputElement>(null);
     
-    const [maLineOptions, setMaLineOptions] = useState<string[]>([]);
+    const [maLineOptions, setMaLineOptions] = useState<string[]>(DEFAULT_MA_LINE_OPTIONS);
     const [newMaLine, setNewMaLine] = useState('');
     const [isAddingMaLine, setIsAddingMaLine] = useState(false);
 
-    useEffect(() => {
+    // Helper to fetch data from server
+    const fetchRemoteData = async (): Promise<MblRemoteData | null> => {
         try {
-            const savedEntries = localStorage.getItem(PENDING_STORAGE_KEY);
-            if (savedEntries) setEntries(JSON.parse(savedEntries));
-
-            const savedCompleted = localStorage.getItem(COMPLETED_STORAGE_KEY);
-            if (savedCompleted) setCompletedEntries(JSON.parse(savedCompleted));
-
-            const savedMaLines = localStorage.getItem(MA_LINE_STORAGE_KEY);
-            if (savedMaLines) {
-                setMaLineOptions(JSON.parse(savedMaLines));
-            } else {
-                setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
+            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`);
+            if (res.ok) {
+                const data = await res.json();
+                return data;
             }
+        } catch (e) {
+            console.error("Failed to fetch remote data", e);
+        }
+        return null;
+    };
 
+    // Helper to save data to server
+    const saveRemoteData = async (data: MblRemoteData) => {
+        try {
+            await fetch(STORE_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: DATA_KEY, data })
+            });
+        } catch (e) {
+            console.error("Failed to save remote data", e);
+            throw e; // Re-throw to handle in UI
+        }
+    };
+
+    const refreshData = async () => {
+        setIsLoadingData(true);
+        const data = await fetchRemoteData();
+        if (data) {
+            setEntries(data.pending || []);
+            setCompletedEntries(data.completed || []);
+            setMaLineOptions(data.options && data.options.length > 0 ? data.options : DEFAULT_MA_LINE_OPTIONS);
+        } else {
+            // Initialize if empty
+             setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
+        }
+        setIsLoadingData(false);
+    };
+
+    useEffect(() => {
+        // Initial load
+        refreshData();
+
+        // User Role Logic (Local Storage is fine for this)
+        try {
             const userEmailRaw = localStorage.getItem('user');
             const allUsersRaw = localStorage.getItem('users');
             if (userEmailRaw && allUsersRaw) {
               const loggedInUserEmail = JSON.parse(userEmailRaw).email;
-              const allUsers: User[] = JSON.parse(allUsersRaw);
-              const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
-              if (currentUser) {
-                setUserRole(currentUser.role);
+              const parsedUsers = JSON.parse(allUsersRaw);
+              if (Array.isArray(parsedUsers)) {
+                const allUsers: User[] = parsedUsers;
+                const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
+                if (currentUser) {
+                  setUserRole(currentUser.role);
+                }
               }
             }
         } catch (error) {
-            console.error("Failed to load data from localStorage", error);
-            setMaLineOptions(DEFAULT_MA_LINE_OPTIONS);
+            console.error("Failed to load user role", error);
         }
     }, []);
 
-    useEffect(() => {
-        try {
-            localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(entries));
-            window.dispatchEvent(new CustomEvent('pending_lists_updated'));
-        } catch (error) {
-            console.error("Failed to save MBL payment data to localStorage", error);
-        }
-    }, [entries]);
-    
-     useEffect(() => {
-        try {
-            localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify(completedEntries));
-        } catch (error) {
-            console.error("Failed to save completed MBL payment data to localStorage", error);
-        }
-    }, [completedEntries]);
-    
-    useEffect(() => {
-        try {
-            if (maLineOptions.length > 0) {
-               localStorage.setItem(MA_LINE_STORAGE_KEY, JSON.stringify(maLineOptions));
-            }
-        } catch (error) {
-            console.error("Failed to save Ma Line options to localStorage", error);
-        }
-    }, [maLineOptions]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -117,20 +131,40 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
     };
     
-    const handleAddMaLine = () => {
+    const handleAddMaLine = async () => {
         const trimmedNewLine = newMaLine.trim().toUpperCase();
         if (!trimmedNewLine) {
             setStatus({ type: 'error', message: 'Tên Mã Line mới không được để trống.' });
             return;
         }
-        if (maLineOptions.some(option => option.toLowerCase() === trimmedNewLine.toLowerCase())) {
-            setStatus({ type: 'error', message: `Mã Line "${trimmedNewLine}" đã tồn tại trong danh sách.` });
-            return;
+        
+        setIsLoadingData(true);
+        try {
+            // Fetch latest data to avoid race conditions
+            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            
+            if (currentData.options.some(option => option.toLowerCase() === trimmedNewLine.toLowerCase())) {
+                setStatus({ type: 'error', message: `Mã Line "${trimmedNewLine}" đã tồn tại.` });
+                setIsLoadingData(false);
+                return;
+            }
+
+            const newOptions = [...currentData.options, trimmedNewLine].sort();
+            
+            await saveRemoteData({
+                ...currentData,
+                options: newOptions
+            });
+            
+            setMaLineOptions(newOptions);
+            setNewMaLine('');
+            setStatus({ type: 'success', message: `Đã thêm thành công Mã Line "${trimmedNewLine}".` });
+            setIsAddingMaLine(false);
+        } catch (err) {
+             setStatus({ type: 'error', message: 'Lỗi khi lưu Mã Line mới.' });
+        } finally {
+            setIsLoadingData(false);
         }
-        setMaLineOptions(prev => [...prev, trimmedNewLine].sort());
-        setNewMaLine('');
-        setStatus({ type: 'success', message: `Đã thêm thành công Mã Line "${trimmedNewLine}".` });
-        setIsAddingMaLine(false);
     };
 
 
@@ -150,6 +184,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         });
 
         try {
+            // 1. Upload File
             const response = await fetch(`${UPLOAD_API_ENDPOINT}?${searchParams.toString()}`, {
                 method: 'POST',
                 body: selectedFile,
@@ -165,8 +200,18 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 hoaDonUrl: result.url,
                 hoaDonFilename: selectedFile.name,
             };
+            
+            // 2. Update Database (Fetch -> Append -> Save)
+            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const updatedPending = [...(currentData.pending || []), newEntry];
+            
+            await saveRemoteData({
+                ...currentData,
+                pending: updatedPending
+            });
 
-            setEntries(prev => [...prev, newEntry]);
+            // 3. Update UI
+            setEntries(updatedPending);
             
             const userRaw = localStorage.getItem('user');
             if (userRaw) {
@@ -191,7 +236,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
     };
 
-    const handleLoadForEditing = (idToLoad: string) => {
+    const handleLoadForEditing = async (idToLoad: string) => {
+        // We allow editing from the local state for UX speed, but syncing back will handle the update
         const entryToLoad = entries.find(entry => entry.id === idToLoad);
         if (entryToLoad) {
             const { maLine, soTien, mbl } = entryToLoad;
@@ -201,9 +247,23 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
-
-            setEntries(prev => prev.filter(entry => entry.id !== idToLoad));
-            setStatus({ type: 'info', message: `Đã tải ${entryToLoad.mbl || entryToLoad.maLine} lên để chỉnh sửa. Vui lòng chọn lại file hóa đơn.` });
+            
+            // Temporarily remove from local UI to avoid confusion, but real deletion happens on 'save'
+            // Actually, for this flow, we should ideally delete it from server now or wait?
+            // To be safe: We delete it from the list so it's not duplicated when they click "Add" again.
+            
+            setIsLoadingData(true);
+            try {
+                 const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+                 const updatedPending = currentData.pending.filter(e => e.id !== idToLoad);
+                 await saveRemoteData({ ...currentData, pending: updatedPending });
+                 setEntries(updatedPending);
+                 setStatus({ type: 'info', message: `Đã tải ${entryToLoad.mbl || entryToLoad.maLine} lên để chỉnh sửa. Vui lòng chọn lại file hóa đơn.` });
+            } catch (e) {
+                setStatus({ type: 'error', message: 'Lỗi khi tải dữ liệu chỉnh sửa.' });
+            } finally {
+                setIsLoadingData(false);
+            }
         }
     };
 
@@ -240,6 +300,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         });
 
         try {
+            // 1. Upload UNC
             const response = await fetch(`${UPLOAD_API_ENDPOINT}?${searchParams.toString()}`, {
                 method: 'POST',
                 body: uncFile,
@@ -254,8 +315,21 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 hoaDonFilename: uncFile.name,
             };
 
-            setCompletedEntries(prev => [...prev, completedEntry]);
-            setEntries(prev => prev.filter(entry => entry.id !== completingEntryId));
+            // 2. Update DB
+            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            
+            const updatedPending = currentData.pending.filter(entry => entry.id !== completingEntryId);
+            const updatedCompleted = [...currentData.completed, completedEntry];
+
+            await saveRemoteData({
+                ...currentData,
+                pending: updatedPending,
+                completed: updatedCompleted
+            });
+
+            // 3. Update UI
+            setEntries(updatedPending);
+            setCompletedEntries(updatedCompleted);
             setStatus({ type: 'success', message: `Đã hoàn thành thanh toán cho Mã Line "${originalEntry.maLine}".` });
 
         } catch (error) {
@@ -288,8 +362,13 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     throw new Error(errorResult.error || 'Lỗi server khi xóa file.');
                 }
             }
+            
+            // Update DB
+            const currentData = await fetchRemoteData() || { pending: [], completed: [], options: DEFAULT_MA_LINE_OPTIONS };
+            const updatedCompleted = currentData.completed.filter(entry => entry.id !== entryToDelete.id);
+            await saveRemoteData({ ...currentData, completed: updatedCompleted });
 
-            setCompletedEntries(prev => prev.filter(entry => entry.id !== entryToDelete.id));
+            setCompletedEntries(updatedCompleted);
             setStatus({ type: 'success', message: 'Đã xóa thành công mục và file UNC.' });
 
         } catch (error) {
@@ -349,6 +428,21 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 className="hidden"
                 accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx"
             />
+            
+            <div className="flex justify-between items-center">
+                <p className="text-sm text-gray-500 italic">
+                    Dữ liệu thanh toán MBL được đồng bộ hóa trên hệ thống.
+                </p>
+                <button 
+                    onClick={refreshData} 
+                    disabled={isLoadingData}
+                    className="flex items-center gap-2 px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition-colors"
+                >
+                    <span className={`${isLoadingData ? 'animate-spin' : ''}`}>🔄</span>
+                    {isLoadingData ? 'Đang tải...' : 'Làm mới dữ liệu'}
+                </button>
+            </div>
+
             <div className="p-4 border rounded-lg bg-gray-50">
                 <h3 className="text-lg font-semibold mb-3 text-gray-700">Nhập thông tin thanh toán MBL</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -425,7 +519,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                         />
                     </div>
                 </div>
-                <button onClick={handleAddEntry} disabled={isUploading} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
+                <button onClick={handleAddEntry} disabled={isUploading || isLoadingData} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400">
                     {isUploading ? 'Đang xử lý...' : 'Tạo yêu cầu thanh toán'}
                 </button>
             </div>
@@ -462,11 +556,12 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                                 onClick={() => handleLoadForEditing(entry.id)}
                                                 className="text-blue-600 hover:text-blue-800 transition-colors text-lg"
                                                 title="Sửa lại"
+                                                disabled={isLoadingData}
                                             >
                                                 ✏️
                                             </button>
                                             {isAdmin && (
-                                                <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
+                                                <button onClick={() => handleCompleteClick(entry.id)} disabled={isUploading || isLoadingData} className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600 transition-colors disabled:bg-gray-400" title="Hoàn thành thanh toán và tải lên UNC">
                                                     Hoàn thành
                                                 </button>
                                             )}
@@ -520,6 +615,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                                     onClick={() => handleDeleteCompleted(entry)}
                                                     className="text-red-600 hover:text-red-800 transition-colors text-lg"
                                                     title="Xóa vĩnh viễn"
+                                                    disabled={isLoadingData}
                                                 >
                                                     🗑️
                                                 </button>

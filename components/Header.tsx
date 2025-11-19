@@ -17,16 +17,25 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const [persistentBadgeCount, setPersistentBadgeCount] = useState(0);
 
   useEffect(() => {
-    // Determine user role to show/hide admin features
-    const userEmailRaw = localStorage.getItem('user');
-    const allUsersRaw = localStorage.getItem('users');
-    if (userEmailRaw && allUsersRaw) {
-      const loggedInUserEmail = JSON.parse(userEmailRaw).email;
-      const allUsers: User[] = JSON.parse(allUsersRaw);
-      const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
-      if (currentUser) {
-        setUserRole(currentUser.role);
+    try {
+      // Determine user role to show/hide admin features
+      const userEmailRaw = localStorage.getItem('user');
+      const allUsersRaw = localStorage.getItem('users');
+      if (userEmailRaw && allUsersRaw) {
+        const loggedInUser = JSON.parse(userEmailRaw);
+        if (loggedInUser && typeof loggedInUser.email === 'string') {
+          const parsedUsers = JSON.parse(allUsersRaw);
+          if (Array.isArray(parsedUsers)) {
+            const allUsers: User[] = parsedUsers;
+            const currentUser = allUsers.find(u => u.email === loggedInUser.email);
+            if (currentUser) {
+              setUserRole(currentUser.role);
+            }
+          }
+        }
       }
+    } catch (error) {
+      console.error("Failed to parse user data in Header:", error);
     }
 
     // --- New Logic for Persistent Badge Count ---

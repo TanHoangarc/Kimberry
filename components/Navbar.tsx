@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ViewType, User } from '../types';
 
@@ -38,15 +37,24 @@ const Navbar: React.FC<NavbarProps> = ({ setActiveView }) => {
   const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
 
   useEffect(() => {
-    const userEmailRaw = localStorage.getItem('user');
-    const allUsersRaw = localStorage.getItem('users');
-    if (userEmailRaw && allUsersRaw) {
-      const loggedInUserEmail = JSON.parse(userEmailRaw).email;
-      const allUsers: User[] = JSON.parse(allUsersRaw);
-      const currentUser = allUsers.find(u => u.email === loggedInUserEmail);
-      if (currentUser) {
-        setUserRole(currentUser.role);
+    try {
+      const userEmailRaw = localStorage.getItem('user');
+      const allUsersRaw = localStorage.getItem('users');
+      if (userEmailRaw && allUsersRaw) {
+        const loggedInUser = JSON.parse(userEmailRaw);
+        if (loggedInUser && typeof loggedInUser.email === 'string') {
+          const parsedUsers = JSON.parse(allUsersRaw);
+          if (Array.isArray(parsedUsers)) {
+            const allUsers: User[] = parsedUsers;
+            const currentUser = allUsers.find(u => u.email === loggedInUser.email);
+            if (currentUser) {
+              setUserRole(currentUser.role);
+            }
+          }
+        }
       }
+    } catch (error) {
+        console.error("Failed to parse user data in Navbar:", error);
     }
   }, []);
 
