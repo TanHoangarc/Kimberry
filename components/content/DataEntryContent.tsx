@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { JobData } from '../../types';
 import CalendarPopup from '../CalendarPopup';
@@ -6,7 +7,9 @@ import CalendarPopup from '../CalendarPopup';
 declare const XLSX: any;
 
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxk6Gw3BlWnhFay3Zacc_NC9ntebz_lELseV0eXocXtS59xUeK781b-B8ZnQ-sT0Oay/exec";
-const LOCAL_STORAGE_KEY = 'kimberry-job-entries';
+const STORE_API_ENDPOINT = '/api/store';
+const DATA_KEY = 'kimberry_data_entry_staging';
+const LOCAL_STORAGE_KEY_LEGACY = 'kimberry-job-entries';
 
 interface DataEntryContentProps {
   back: () => void;
@@ -35,9 +38,10 @@ const formFields: { name: keyof JobData; label: string; type: string; required?:
 const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
     const [formData, setFormData] = useState<JobData>(initialFormData);
     const [jobEntries, setJobEntries] = useState<JobData[]>([]);
-    const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+    const [status, setStatus] = useState<{ type: 'success' | 'error' | 'info' | 'warning'; message: string } | null>(null);
     const [isJobLoading, setIsJobLoading] = useState(false);
     const [isSheetLoading, setIsSheetLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [processingText, setProcessingText] = useState('');
     const [isChecking, setIsChecking] = useState(false);
     
@@ -45,26 +49,105 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarTargetField, setCalendarTargetField] = useState<'NoiDung1' | 'NoiDung2' | null>(null);
 
-    // Load entries from localStorage on initial render
-    useEffect(() => {
+    // --- Cloud Storage Helpers ---
+    const fetchRemoteData = async (): Promise<JobData[] | null> => {
         try {
-            const savedEntries = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedEntries) {
-                setJobEntries(JSON.parse(savedEntries));
+            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}&_t=${Date.now()}`);
+            if (res.ok) {
+                const json = await res.json();
+                return Array.isArray(json.data) ? json.data : [];
             }
-        } catch (error) {
-            console.error("Failed to load data from localStorage", error);
+            return null;
+        } catch (e) {
+            console.error("Fetch error:", e);
+            return null;
         }
-    }, []);
+    };
 
-    // Save entries to localStorage whenever they change
-    useEffect(() => {
+    const saveRemoteData = async (data: JobData[]) => {
+        setIsSaving(true);
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(jobEntries));
-        } catch (error) {
-            console.error("Failed to save data to localStorage", error);
+            const res = await fetch(`${STORE_API_ENDPOINT}?key=${DATA_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data })
+            });
+            if (!res.ok) {
+                throw new Error(`Lỗi Server: ${res.status}`);
+            }
+        } catch (e) {
+            console.error("Save error:", e);
+            throw e;
+        } finally {
+            setIsSaving(false);
         }
-    }, [jobEntries]);
+    };
+
+    // Initialization: Load from Cloud + Migrate Local Data
+    useEffect(() => {
+        const initializeData = async () => {
+            setIsSaving(true);
+            setStatus({ type: 'info', message: 'Đang tải dữ liệu bảng tạm từ server...' });
+            
+            try {
+                // 1. Load Cloud Data
+                let cloudData = await fetchRemoteData() || [];
+                
+                // 2. Check Local Storage (Legacy Data)
+                const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY_LEGACY);
+                if (localRaw) {
+                    try {
+                        const localData: JobData[] = JSON.parse(localRaw);
+                        if (localData.length > 0) {
+                            // Merge: Add local items to cloud data if they don't exist
+                            const mergedData = [...cloudData];
+                            let hasChanges = false;
+                            
+                            localData.forEach(localItem => {
+                                if (!mergedData.some(cloudItem => cloudItem.Ma === localItem.Ma)) {
+                                    mergedData.push(localItem);
+                                    hasChanges = true;
+                                }
+                            });
+
+                            if (hasChanges) {
+                                await saveRemoteData(mergedData);
+                                cloudData = mergedData;
+                                setStatus({ type: 'success', message: 'Đã đồng bộ dữ liệu cũ từ máy lên server.' });
+                            }
+                        }
+                        // Clear legacy local storage
+                        localStorage.removeItem(LOCAL_STORAGE_KEY_LEGACY);
+                    } catch (e) {
+                        console.error("Migration error:", e);
+                    }
+                }
+
+                setJobEntries(cloudData);
+                if (!status || status.type === 'info') {
+                     setStatus(null);
+                }
+            } catch (error) {
+                setStatus({ type: 'error', message: 'Không thể tải dữ liệu. Vui lòng thử lại.' });
+            } finally {
+                setIsSaving(false);
+            }
+        };
+
+        initializeData();
+    }, []);
+    
+    const handleRefresh = async () => {
+        setIsSaving(true);
+        const data = await fetchRemoteData();
+        if (data) {
+            setJobEntries(data);
+            setStatus({ type: 'success', message: 'Dữ liệu đã được làm mới.' });
+        } else {
+            setStatus({ type: 'error', message: 'Không thể kết nối tới server.' });
+        }
+        setIsSaving(false);
+    };
 
     const handleLoadFromSheet = async () => {
         const maToLoad = formData.Ma?.trim();
@@ -148,7 +231,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
         }
     };
 
-    const handleAddJob = () => {
+    const handleAddJob = async () => {
         if (!formData.Ma || formData.Ma.trim() === '') {
             setStatus({ type: 'error', message: 'Mã Job là trường bắt buộc.' });
             return;
@@ -157,25 +240,48 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             setStatus({ type: 'error', message: `Mã Job "${formData.Ma}" đã tồn tại trong bảng tạm.` });
             return;
         }
-        setJobEntries(prev => [...prev, formData]);
+        
+        const newEntries = [...jobEntries, formData];
+        setJobEntries(newEntries);
         setFormData(initialFormData);
-        setStatus({ type: 'success', message: `Đã thêm Job "${formData.Ma}" vào bảng tạm.` });
+        
+        try {
+            await saveRemoteData(newEntries);
+            setStatus({ type: 'success', message: `Đã lưu Job "${formData.Ma}" vào bảng tạm Server.` });
+        } catch (e) {
+            setStatus({ type: 'error', message: 'Lỗi lưu dữ liệu lên Server (nhưng đã lưu tạm thời).' });
+        }
     };
 
-    const handleDeleteJob = (maToDelete: string | undefined) => {
+    const handleDeleteJob = async (maToDelete: string | undefined) => {
         if (!maToDelete) return;
-        setJobEntries(prev => prev.filter(job => job.Ma !== maToDelete));
-        setStatus({ type: 'info', message: `Đã xóa Job "${maToDelete}" khỏi bảng tạm.` });
+        const newEntries = jobEntries.filter(job => job.Ma !== maToDelete);
+        setJobEntries(newEntries);
+        
+        try {
+            await saveRemoteData(newEntries);
+            setStatus({ type: 'info', message: `Đã xóa Job "${maToDelete}" khỏi bảng tạm.` });
+        } catch (e) {
+            setStatus({ type: 'error', message: 'Lỗi khi xóa trên Server.' });
+        }
     };
 
-    const handleLoadJobForEditing = (maToLoad: string | undefined) => {
+    const handleLoadJobForEditing = async (maToLoad: string | undefined) => {
         if (!maToLoad) return;
         const jobToLoad = jobEntries.find(job => job.Ma === maToLoad);
         if (jobToLoad) {
-            setFormData(jobToLoad); // Load data into the form
-            // Remove the job from the temporary list to avoid duplicates after editing
-            setJobEntries(prev => prev.filter(job => job.Ma !== maToLoad));
-            setStatus({ type: 'info', message: `Đã tải Job "${maToLoad}" lên mục nhập liệu để chỉnh sửa.` });
+            setFormData(jobToLoad);
+            
+            // Remove from list and save to server
+            const newEntries = jobEntries.filter(job => job.Ma !== maToLoad);
+            setJobEntries(newEntries);
+            
+            try {
+                await saveRemoteData(newEntries);
+                setStatus({ type: 'info', message: `Đã tải Job "${maToLoad}" lên để chỉnh sửa.` });
+            } catch (e) {
+                setStatus({ type: 'warning', message: 'Đã tải để sửa nhưng chưa cập nhật được Server.' });
+            }
         }
     };
 
@@ -194,11 +300,15 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'bulkAdd', data: jobEntries }),
             });
-            setStatus({ type: 'success', message: 'Yêu cầu đồng bộ đã được gửi. Dữ liệu sẽ sớm được cập nhật trên Google Sheet.' });
+            
+            // On success, clear the staging table on both Client and Server
             setJobEntries([]);
+            await saveRemoteData([]);
+            
+            setStatus({ type: 'success', message: 'Yêu cầu đồng bộ đã gửi. Dữ liệu sẽ sớm được cập nhật trên Google Sheet.' });
         } catch (error) {
             console.error('Sync error:', error);
-            setStatus({ type: 'error', message: 'Đồng bộ thất bại. Vui lòng thử lại. Dữ liệu vẫn được lưu tạm thời.' });
+            setStatus({ type: 'error', message: 'Đồng bộ thất bại. Dữ liệu vẫn được giữ lại.' });
         } finally {
             setIsJobLoading(false);
         }
@@ -234,11 +344,12 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
         const numRemoved = jobEntries.length - jobsToKeep.length;
 
         setJobEntries(jobsToKeep);
-
+        
         if (numRemoved > 0) {
-            setStatus({ type: 'success', message: `Kiểm tra hoàn tất. Đã xóa ${numRemoved} mục đã tồn tại trên Google Sheet.` });
+            await saveRemoteData(jobsToKeep);
+            setStatus({ type: 'success', message: `Đã xóa ${numRemoved} mục đã tồn tại trên Google Sheet.` });
         } else {
-            setStatus({ type: 'info', message: 'Kiểm tra hoàn tất. Tất cả các mục trong bảng tạm đều chưa có trên Google Sheet.' });
+            setStatus({ type: 'info', message: 'Tất cả các mục đều chưa có trên Google Sheet.' });
         }
         setIsChecking(false);
     };
@@ -317,7 +428,6 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             setStatus({ type: 'error', message: 'Không thể trích xuất dữ liệu. Vui lòng kiểm tra định dạng văn bản.' });
         }
 
-        // Clear the processing text area after handling
         setProcessingText('');
     };
     
@@ -325,6 +435,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
         success: 'text-green-600 bg-green-100 border-green-300',
         error: 'text-red-600 bg-red-100 border-red-300',
         info: 'text-blue-600 bg-blue-100 border-blue-300',
+        warning: 'text-amber-600 bg-amber-100 border-amber-300',
     };
 
     return (
@@ -337,7 +448,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             )}
 
             <div className="p-4 border rounded-lg bg-gray-50">
-                <h3 className="text-lg font-semibold mb-3 text-gray-700">Xử lý dữ liệu</h3>
+                <h3 className="text-lg font-semibold mb-3 text-gray-700">Xử lý dữ liệu nhanh</h3>
                 <textarea
                     value={processingText}
                     onChange={(e) => setProcessingText(e.target.value)}
@@ -435,15 +546,29 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                         )
                     })}
                 </div>
-                <button onClick={handleAddJob} className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99]">
-                    ➕ Thêm vào bảng tạm
+                <button 
+                    onClick={handleAddJob} 
+                    disabled={isSaving}
+                    className="mt-4 px-4 py-2 bg-[#5c9ead] text-white rounded-md hover:bg-[#4a8c99] disabled:bg-gray-400"
+                >
+                    {isSaving ? 'Đang lưu...' : '➕ Thêm vào bảng tạm'}
                 </button>
             </div>
 
-            {status && <div className={`p-3 rounded-md border ${statusColor[status.type]}`}>{status.message}</div>}
+            {status && <div className={`p-3 rounded-md border ${statusColor[status.type as keyof typeof statusColor] || statusColor.info}`}>{status.message}</div>}
 
-            <div className="p-4 border rounded-lg">
-                <h3 className="text-lg font-semibold mb-3 text-gray-700">Bảng tạm ({jobEntries.length} mục)</h3>
+            <div className="p-4 border rounded-lg bg-white shadow-sm">
+                <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-lg font-semibold text-gray-700">Bảng tạm Cloud ({jobEntries.length} mục)</h3>
+                    <button 
+                        onClick={handleRefresh} 
+                        disabled={isSaving}
+                        className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                    >
+                        <span className={isSaving ? 'animate-spin' : ''}>🔄</span> Làm mới dữ liệu
+                    </button>
+                </div>
+                
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-100">
@@ -462,8 +587,22 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                     ))}
                                     <td className="p-2 text-right">
                                         <div className="flex justify-end items-center gap-3">
-                                            <button onClick={() => handleLoadJobForEditing(job.Ma)} className="text-blue-500 hover:text-blue-700" title="Sửa lại mục này">✏️</button>
-                                            <button onClick={() => handleDeleteJob(job.Ma)} className="text-red-500 hover:text-red-700" title="Xóa mục này">🗑️</button>
+                                            <button 
+                                                onClick={() => handleLoadJobForEditing(job.Ma)} 
+                                                className="text-blue-500 hover:text-blue-700 disabled:text-gray-300" 
+                                                title="Sửa lại mục này"
+                                                disabled={isSaving}
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteJob(job.Ma)} 
+                                                className="text-red-500 hover:text-red-700 disabled:text-gray-300" 
+                                                title="Xóa mục này"
+                                                disabled={isSaving}
+                                            >
+                                                🗑️
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -472,24 +611,25 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                     </table>
                 </div>
                 {jobEntries.length === 0 && <p className="text-center text-gray-500 py-4">Bảng tạm trống.</p>}
-                <div className="flex flex-wrap gap-4 mt-4">
+                
+                <div className="flex flex-wrap gap-4 mt-4 border-t pt-4">
                     <button
                         onClick={handleSync}
-                        disabled={isJobLoading || isChecking || jobEntries.length === 0}
+                        disabled={isJobLoading || isChecking || isSaving || jobEntries.length === 0}
                         className="px-4 py-2 bg-[#184d47] text-white rounded-md hover:bg-opacity-80 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                         {isJobLoading ? 'Đang đồng bộ...' : `☁️ Đồng bộ ${jobEntries.length} mục`}
                     </button>
                     <button
                         onClick={handleCheckExistingJobs}
-                        disabled={isChecking || isJobLoading || jobEntries.length === 0}
+                        disabled={isChecking || isJobLoading || isSaving || jobEntries.length === 0}
                         className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                         {isChecking ? 'Đang kiểm tra...' : '🔍 Kiểm tra'}
                     </button>
                     <button
                         onClick={handleDownloadExcel}
-                        disabled={jobEntries.length === 0 || isChecking || isJobLoading}
+                        disabled={jobEntries.length === 0 || isChecking || isJobLoading || isSaving}
                         className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                         ⬇️ Tải xuống Excel
