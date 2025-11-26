@@ -49,14 +49,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         let url = directUrl;
         
         if (!url) {
-            const filePath = `db/${key}.json`;
-            const { blobs } = await list({ prefix: filePath, limit: 1 });
-            if (blobs.length > 0) {
-                url = blobs[0].url;
+            // Updated Logic: Find the latest file for this key
+            // We use prefix matching because addRandomSuffix changes the filename
+            const prefix = `db/${key}`;
+            const { blobs } = await list({ prefix, limit: 100 });
+            
+            // Sort by uploadedAt descending (newest first)
+            const sortedBlobs = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+            
+            if (sortedBlobs.length > 0) {
+                url = sortedBlobs[0].url;
             }
         }
 
         if (!url) {
+            // Return null data if no file found, to indicate empty DB
             return res.status(200).json({ data: null, url: null }); 
         }
 
@@ -66,6 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         
         if (!response.ok) {
+             // If the file url is stale (deleted), return null so client can create new
             return res.status(200).json({ data: null, url: null });
         }
         
@@ -99,7 +107,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const blob = await put(filePath, JSON.stringify(data), { 
             access: 'public', 
-            addRandomSuffix: false,
+            // Enable random suffix to ensure a new URL is generated every time.
+            // This forces clients/CDNs to fetch the new version.
+            addRandomSuffix: true,
             contentType: 'application/json',
             // @ts-ignore: Vercel Blob requires this flag
             allowOverwrite: true

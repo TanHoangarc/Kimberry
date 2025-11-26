@@ -61,6 +61,8 @@ export default async function handler(
 
     const blob = await put(blobPath, request, {
       access: 'public',
+      // @ts-ignore: Vercel Blob option
+      allowOverwrite: true,
     });
 
     return response.status(200).json({

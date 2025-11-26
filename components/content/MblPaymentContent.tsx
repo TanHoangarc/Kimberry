@@ -227,8 +227,16 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         setIsUploading(true);
         setStatus({ type: 'info', message: 'Đang tải hóa đơn...' });
 
+        // Sanitize MBL to be filename-safe
+        const safeMbl = formData.mbl 
+            ? formData.mbl.trim().replace(/[^a-zA-Z0-9-_]/g, '') 
+            : `NO_MBL_${Date.now()}`;
+        
+        // Use sanitized MBL in the folder structure
+        const jobId = `MBL-${formData.maLine}-${safeMbl}`;
+
         const searchParams = new URLSearchParams({
-            jobId: `MBL-${formData.maLine}-${Date.now()}`,
+            jobId: jobId,
             filename: selectedFile.name,
             uploadPath: 'MBL'
         });
@@ -363,8 +371,15 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         setIsUploading(true);
         setStatus({ type: 'info', message: `B1: Đang tải file UNC lên Server...` });
 
+        // Sanitize MBL to be filename-safe
+        const safeMbl = originalEntry.mbl 
+            ? originalEntry.mbl.trim().replace(/[^a-zA-Z0-9-_]/g, '') 
+            : `NO_MBL_${originalEntry.id}`;
+
+        const jobId = `DONE-${originalEntry.maLine}-${safeMbl}`;
+
         const searchParams = new URLSearchParams({
-            jobId: `DONE-${originalEntry.maLine}-${originalEntry.id}`,
+            jobId: jobId,
             filename: uncFile.name,
             uploadPath: 'DONE'
         });
