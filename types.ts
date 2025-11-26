@@ -1,5 +1,5 @@
 
-export type ViewType = 'default' | 'tariff' | 'handbook' | 'policies' | 'template' | 'marketing' | 'submission' | 'admin' | 'dataEntry' | 'mblPayment';
+export type ViewType = 'default' | 'tariff' | 'handbook' | 'policies' | 'template' | 'marketing' | 'submission' | 'admin' | 'dataEntry' | 'mblPayment' | 'fileManager' | 'aiTool';
 
 export interface User {
   email: string;

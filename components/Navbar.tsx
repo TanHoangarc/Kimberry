@@ -5,36 +5,29 @@ interface NavbarProps {
   setActiveView: (view: ViewType) => void;
 }
 
-const NavButton: React.FC<{ 
+const NavLink: React.FC<{ 
   onClick: () => void; 
   children: React.ReactNode, 
-  isAdmin?: boolean;
-  isSpecial?: boolean;
-}> = ({ onClick, children, isAdmin = false, isSpecial = false }) => {
-    const baseClasses = "font-semibold m-2 px-5 py-3 rounded-lg text-sm transition-colors duration-300 shadow-sm";
-    let colorClasses = "";
-
-    if (isAdmin) {
-        colorClasses = 'bg-red-600 text-white hover:bg-red-700';
-    } else if (isSpecial) {
-        colorClasses = 'bg-amber-500 text-white hover:bg-amber-600';
-    } else {
-        colorClasses = 'bg-[#a8d0a2] text-gray-800 hover:bg-[#5c9ead] hover:text-white';
-    }
-    
+  active?: boolean;
+}> = ({ onClick, children, active }) => {
     return (
       <button
         onClick={onClick}
-        className={`${baseClasses} ${colorClasses}`}
+        className={`
+            text-lg font-medium transition-all duration-300 px-1 py-2 mx-2 border-b-2
+            ${active 
+                ? 'text-white border-green-400' 
+                : 'text-white/70 border-transparent hover:text-white hover:border-white/30'}
+        `}
       >
         {children}
       </button>
     );
 };
 
-
 const Navbar: React.FC<NavbarProps> = ({ setActiveView }) => {
   const [userRole, setUserRole] = useState<'Admin' | 'Document' | 'Customer' | null>(null);
+  const [currentView, setCurrentView] = useState<ViewType>('default');
 
   useEffect(() => {
     try {
@@ -58,33 +51,34 @@ const Navbar: React.FC<NavbarProps> = ({ setActiveView }) => {
     }
   }, []);
 
+  const handleNavClick = (view: ViewType) => {
+      setCurrentView(view);
+      setActiveView(view);
+  }
+
   const isAdmin = userRole === 'Admin';
   const isDocument = userRole === 'Document';
 
   return (
-    <nav className="flex justify-center flex-wrap bg-white p-2 shadow-md sticky top-0 z-20">
-      <NavButton onClick={() => setActiveView('tariff')}>Tariff Vietnam</NavButton>
-      <NavButton onClick={() => setActiveView('handbook')}>Tài khoản Kimberry</NavButton>
-      <NavButton onClick={() => setActiveView('policies')}>Hồ sơ Hoàn cược</NavButton>
-      <NavButton onClick={() => setActiveView('template')}>File mẫu CVHC</NavButton>
-      <NavButton onClick={() => setActiveView('marketing')}>Tra cứu Job</NavButton>
-      <NavButton onClick={() => setActiveView('submission')}>Nộp hồ sơ hoàn cược</NavButton>
+    <nav className="flex flex-wrap justify-center md:justify-end items-center mt-4 md:mt-0">
+      <NavLink active={currentView === 'default'} onClick={() => handleNavClick('default')}>Home</NavLink>
+      <NavLink active={currentView === 'tariff'} onClick={() => handleNavClick('tariff')}>Tariff</NavLink>
+      <NavLink active={currentView === 'handbook'} onClick={() => handleNavClick('handbook')}>Account</NavLink>
+      <NavLink active={currentView === 'policies'} onClick={() => handleNavClick('policies')}>Refund</NavLink>
+      <NavLink active={currentView === 'marketing'} onClick={() => handleNavClick('marketing')}>Lookup</NavLink>
+      <NavLink active={currentView === 'submission'} onClick={() => handleNavClick('submission')}>Submit</NavLink>
       
       {(isAdmin || isDocument) && (
-        <NavButton onClick={() => setActiveView('mblPayment')} isSpecial={true}>
-            💳 Thanh toán MBL
-        </NavButton>
+        <NavLink active={currentView === 'mblPayment'} onClick={() => handleNavClick('mblPayment')}>Payment</NavLink>
       )}
 
       {isAdmin && (
-        <>
-          <NavButton onClick={() => setActiveView('dataEntry')} isAdmin={true}>
-            📝 Nhập liệu
-          </NavButton>
-          <NavButton onClick={() => setActiveView('admin')} isAdmin={true}>
-            ⚙️ Cài đặt
-          </NavButton>
-        </>
+        <div className="flex items-center ml-4 pl-4 border-l border-white/20">
+            <NavLink active={currentView === 'dataEntry'} onClick={() => handleNavClick('dataEntry')}>Input</NavLink>
+            <NavLink active={currentView === 'fileManager'} onClick={() => handleNavClick('fileManager')}>File</NavLink>
+            <NavLink active={currentView === 'aiTool'} onClick={() => handleNavClick('aiTool')}>PDF Tool</NavLink>
+            <NavLink active={currentView === 'admin'} onClick={() => handleNavClick('admin')}>Admin</NavLink>
+        </div>
       )}
     </nav>
   );

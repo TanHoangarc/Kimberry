@@ -24,7 +24,7 @@ const Calendar: React.FC = () => {
 
     for (let i = firstDay - 1; i >= 0; i--) {
       calendarDays.push(
-        <div key={`prev-${i}`} className="p-3 text-center rounded-full text-gray-300">
+        <div key={`prev-${i}`} className="p-3 text-center rounded-full text-white/20 text-sm">
           {prevMonthDays - i}
         </div>
       );
@@ -37,10 +37,11 @@ const Calendar: React.FC = () => {
         <div
           key={`current-${d}`}
           className={`
-            p-3 text-center rounded-full transition-all duration-200
-            ${isToday ? 'bg-[#5c9ead] text-white font-bold' : ''}
-            ${!isToday ? 'hover:bg-[#a8d0a2] hover:text-white cursor-pointer' : ''}
-            ${isSunday && !isToday ? 'text-red-500' : ''}
+            p-3 text-center rounded-full transition-all duration-300 text-sm font-medium
+            ${isToday 
+                ? 'bg-green-500 text-white font-bold shadow-[0_0_10px_rgba(74,222,128,0.5)]' 
+                : 'text-white/80 hover:bg-white/20 hover:text-white cursor-pointer'}
+            ${isSunday && !isToday ? 'text-red-300/80' : ''}
           `}
         >
           {d}
@@ -52,7 +53,7 @@ const Calendar: React.FC = () => {
     const remaining = 42 - totalCells;
     for (let d = 1; d <= remaining; d++) {
         calendarDays.push(
-            <div key={`next-${d}`} className="p-3 text-center rounded-full text-gray-300">
+            <div key={`next-${d}`} className="p-3 text-center rounded-full text-white/20 text-sm">
                 {d}
             </div>
         );
@@ -72,47 +73,56 @@ const Calendar: React.FC = () => {
     setCurrentDate(new Date(parseInt(e.target.value), month, 1));
   };
 
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
+  const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-5 w-full font-sans text-gray-800">
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0">
+    <div className="rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-6 w-full text-white shadow-2xl">
+      <div className="flex items-center justify-between gap-3 mb-6 relative z-10">
+        <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors flex-shrink-0 text-white/80 hover:text-green-300">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
         </button>
-        <div className="flex justify-center gap-3 w-full">
-            <select value={month} onChange={handleMonthChange} className="border-none bg-gray-100 rounded-lg p-2 text-sm font-semibold outline-none cursor-pointer w-full">
-                {monthsVN.map((m, i) => <option key={i} value={i}>{m}</option>)}
+        <div className="flex justify-center gap-2 w-full bg-black/20 p-1.5 rounded-full border border-white/5">
+            <select value={month} onChange={handleMonthChange} className="bg-transparent text-white font-bold text-center outline-none cursor-pointer appearance-none hover:text-green-300 transition-colors text-sm px-2">
+                {monthsVN.map((m, i) => <option key={i} value={i} className="text-gray-900 bg-white">{m}</option>)}
             </select>
-            <select value={year} onChange={handleYearChange} className="border-none bg-gray-100 rounded-lg p-2 text-sm font-semibold outline-none cursor-pointer w-full">
-                {Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => <option key={y} value={y}>{y}</option>)}
+            <span className="text-white/30 self-center">|</span>
+            <select value={year} onChange={handleYearChange} className="bg-transparent text-white font-bold text-center outline-none cursor-pointer appearance-none hover:text-green-300 transition-colors text-sm px-2">
+                {Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => <option key={y} value={y} className="text-gray-900 bg-white">{y}</option>)}
             </select>
         </div>
-        <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0">
+        <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors flex-shrink-0 text-white/80 hover:text-green-300">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
         </button>
       </div>
-      <div className="grid grid-cols-7 text-center gap-2">
+      
+      <div className="grid grid-cols-7 text-center gap-1 mb-4 relative z-10">
         {dayNames.map((day, index) => (
-          <div key={day} className={`font-bold text-gray-500 text-xs ${index === 0 ? 'text-red-500' : ''}`}>{day}</div>
+          <div key={day} className={`font-bold text-[10px] uppercase tracking-widest mb-2 ${index === 0 ? 'text-red-400' : 'text-green-200/50'}`}>{day}</div>
         ))}
         {days}
       </div>
-      <div className="mt-5 text-left bg-[#ceffe5] rounded-xl p-4 border border-gray-200">
-        <h3 className="font-bold text-gray-800 text-base mb-2">🗒️ Thông báo</h3>
-        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-          <li>Lịch làm việc của Kimberry từ T2-T6, sáng T7 hàng tuần.</li>
-          <li>Kimberry sẽ Hoàn cược 1-2 tuần khi nhận được hồ sơ hoàn cược.</li>
-          <li>
-            Thông báo nghỉ Tết.<br />
-            - Thời gian nghỉ: <b>14/02/2026</b> (Dương lịch).<br />
-            - Thời làm lại: <b>23/02/2026</b> (Dương lịch)
+
+      <div className="mt-6 pt-4 border-t border-white/10 relative z-10">
+        <h3 className="font-bold text-green-300 text-sm mb-3 flex items-center gap-2 uppercase tracking-wide">
+            <span className="animate-pulse">🔴</span> Thông báo
+        </h3>
+        <ul className="text-sm text-gray-300 space-y-3 leading-relaxed">
+          <li className="flex items-start gap-2">
+            <span className="text-green-400 mt-1">●</span>
+            <span>Lịch làm việc: <b className="text-white">T2-T6, sáng T7.</b></span>
+          </li>
+          <li className="flex items-start gap-2">
+             <span className="text-green-400 mt-1">●</span>
+             <span>Hoàn cược: <b className="text-white">1-2 tuần</b> sau khi nhận hồ sơ.</span>
+          </li>
+          <li className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 p-3 rounded-xl border border-yellow-500/20 mt-2">
+            <span className="text-yellow-300 font-bold block mb-1 text-xs uppercase tracking-wider">Lịch nghỉ Tết</span>
+            <div className="flex justify-between items-center text-xs">
+                 <span>Nghỉ: <b className="text-white">14/02</b></span>
+                 <span>→</span>
+                 <span>Làm lại: <b className="text-white">23/02</b></span>
+            </div>
           </li>
         </ul>
       </div>
