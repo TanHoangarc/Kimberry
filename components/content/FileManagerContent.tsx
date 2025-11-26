@@ -220,37 +220,37 @@ const FileManagerContent: React.FC<FileManagerContentProps> = ({ back }) => {
                 </div>
             ) : (
                 // --- FILE LIST VIEW ---
-                <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 overflow-hidden shadow-xl animate-fade-in">
+                <div className="bg-white/70 backdrop-blur-md rounded-3xl border border-white/30 overflow-hidden shadow-xl animate-fade-in">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-white/10 text-green-300 uppercase">
-                                <tr>
+                        <table className="w-full text-sm text-left border-collapse">
+                            <thead className="bg-white/20 uppercase">
+                                <tr className="!text-[#184d47] border-b border-gray-300">
                                     <th className="p-4 font-bold">Tên File</th>
                                     <th className="p-4 font-bold">Kích thước</th>
                                     <th className="p-4 font-bold">Ngày tải lên</th>
                                     <th className="p-4 font-bold text-right">Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-gray-200">
+                            <tbody className="text-[#184d47]">
                                 {displayedFiles.map((file) => (
-                                    <tr key={file.url} className="border-b border-white/10 hover:bg-white/5 transition-colors last:border-0 group">
+                                    <tr key={file.url} className="border-b border-gray-300 hover:bg-white/50 transition-colors last:border-0 group">
                                         <td className="p-4">
                                             <div className="flex flex-col">
                                                 <div className="flex items-center gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                    <span className="font-medium text-white break-all hover:text-green-300 transition-colors cursor-default">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#184d47]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                    <span className="font-bold text-[#184d47] break-all cursor-default">
                                                         {file.pathname.replace(`${currentFolder}/`, '')}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 whitespace-nowrap font-mono text-gray-400">{formatSize(file.size)}</td>
-                                        <td className="p-4 whitespace-nowrap text-gray-400">{new Date(file.uploadedAt).toLocaleDateString('vi-VN')}</td>
+                                        <td className="p-4 whitespace-nowrap font-mono text-gray-600 font-semibold">{formatSize(file.size)}</td>
+                                        <td className="p-4 whitespace-nowrap text-gray-600 font-semibold">{new Date(file.uploadedAt).toLocaleDateString('vi-VN')}</td>
                                         <td className="p-4 text-right whitespace-nowrap">
-                                            <div className="flex justify-end items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex justify-end items-center gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                                                 <button 
                                                     onClick={() => handlePreview(file)}
-                                                    className="p-2 text-blue-400 hover:text-white hover:bg-blue-500 rounded-lg transition-colors"
+                                                    className="p-2 text-blue-600 hover:text-white hover:bg-blue-500 rounded-lg transition-colors border border-blue-200 hover:border-blue-500"
                                                     title="Xem trước"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
@@ -258,14 +258,14 @@ const FileManagerContent: React.FC<FileManagerContentProps> = ({ back }) => {
                                                 <button 
                                                     onClick={() => handleForceDownload(file)}
                                                     disabled={downloadingUrl === file.url}
-                                                    className="p-2 text-green-400 hover:text-white hover:bg-green-500 rounded-lg transition-colors disabled:opacity-50"
+                                                    className="p-2 text-green-600 hover:text-white hover:bg-green-500 rounded-lg transition-colors disabled:opacity-50 border border-green-200 hover:border-green-500"
                                                     title="Tải xuống"
                                                 >
                                                     {downloadingUrl === file.url ? <span className="animate-spin h-5 w-5 block border-2 border-current border-t-transparent rounded-full"></span> : <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>}
                                                 </button>
                                                 <button 
                                                     onClick={() => handleDelete(file)}
-                                                    className="p-2 text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors"
+                                                    className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-red-200 hover:border-red-500"
                                                     title="Xóa"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -276,7 +276,7 @@ const FileManagerContent: React.FC<FileManagerContentProps> = ({ back }) => {
                                 ))}
                                 {displayedFiles.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="p-10 text-center text-gray-500 bg-white/5">
+                                        <td colSpan={4} className="p-10 text-center text-gray-500">
                                             <p className="mb-2 text-2xl">🗑️</p>
                                             Thư mục này trống.
                                         </td>
