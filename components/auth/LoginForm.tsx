@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface LoginFormProps {
@@ -49,7 +50,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, switchToRegister 
     return (
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl animate-fade-in">
             <div className="text-center mb-8">
-                <div className="w-20 h-20 mx-auto mb-4 bg-white/10 rounded-full flex items-center justify-center p-3 border border-white/20 shadow-inner">
+                <div className="w-28 h-28 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center p-5 border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                     <img 
                         src="https://i.ibb.co/Lm6Bcb2/kim.png" 
                         alt="Kimberry Logo" 

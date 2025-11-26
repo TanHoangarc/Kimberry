@@ -640,29 +640,29 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             )}
 
             {/* PENDING LIST */}
-            <div className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl overflow-hidden">
-                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/30 shadow-xl overflow-hidden text-[#184d47]">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-300 pb-4">
                     <span className="text-2xl">⏳</span>
-                    <h3 className="text-xl font-bold text-yellow-300 uppercase tracking-wide">Danh sách chờ thanh toán ({entries.length})</h3>
+                    <h3 className="text-xl font-bold !text-[#184d47] uppercase tracking-wide">Danh sách chờ thanh toán ({entries.length})</h3>
                 </div>
                 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr className="text-green-300 uppercase text-xs tracking-wider border-b border-white/20">
-                                <th className="p-4 font-bold">Mã Line</th>
-                                <th className="p-4 font-bold">MBL</th>
-                                <th className="p-4 font-bold text-right">Số tiền</th>
-                                <th className="p-4 font-bold text-center">Hóa đơn</th>
-                                <th className="p-4 font-bold text-right">Hành động</th>
+                            <tr className="!text-[#184d47] uppercase text-xs tracking-wider border-b border-gray-300">
+                                <th className="p-4 font-bold !text-[#184d47]">Mã Line</th>
+                                <th className="p-4 font-bold !text-[#184d47]">MBL</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-right">Số tiền</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-center">Hóa đơn</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-right">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody className="text-gray-200">
+                        <tbody className="text-[#184d47]">
                             {entries.map((entry) => (
-                                <tr key={entry.id} className="border-b border-white/10 last:border-0 hover:bg-white/5 transition-colors group">
-                                    <td className="p-4 font-medium text-white">{entry.maLine}</td>
-                                    <td className="p-4">{entry.mbl || '-'}</td>
-                                    <td className="p-4 text-right font-mono text-yellow-200 font-bold">
+                                <tr key={entry.id} className="border-b border-gray-200 last:border-0 hover:bg-white/50 transition-colors group">
+                                    <td className="p-4 font-bold !text-[#184d47]">{entry.maLine}</td>
+                                    <td className="p-4 !text-[#184d47]">{entry.mbl || '-'}</td>
+                                    <td className="p-4 text-right font-mono text-red-700 font-bold text-lg">
                                         {typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}
                                     </td>
                                     <td className="p-4 text-center">
@@ -670,7 +670,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             href={entry.hoaDonUrl} 
                                             target="_blank" 
                                             rel="noopener noreferrer" 
-                                            className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white transition-all text-xs border border-blue-500/30"
+                                            className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white transition-all text-xs border border-blue-200"
                                             title={entry.hoaDonFilename}
                                         >
                                             Xem file
@@ -680,7 +680,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                         <div className="flex justify-end items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => handleLoadForEditing(entry.id)}
-                                                className="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 hover:text-blue-300 transition-colors"
+                                                className="p-2 hover:bg-blue-100 rounded-lg text-blue-600 hover:text-blue-700 transition-colors"
                                                 title="Sửa lại"
                                                 disabled={isLoadingData}
                                             >
@@ -692,7 +692,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                                 <button 
                                                     onClick={() => handleCompleteClick(entry.id)} 
                                                     disabled={isUploading || isLoadingData} 
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600/80 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600/90 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
                                                 >
                                                     <span>✓ Hoàn thành</span>
                                                 </button>
@@ -705,36 +705,36 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                     </table>
                 </div>
                 {entries.length === 0 && (
-                    <div className="text-center py-8 text-gray-400 bg-white/5 rounded-xl border border-dashed border-white/10 mt-2">
+                    <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300 mt-2">
                         <p>Chưa có yêu cầu thanh toán nào.</p>
                     </div>
                 )}
             </div>
             
             {/* COMPLETED LIST */}
-            <div className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/30 shadow-xl overflow-hidden text-[#184d47] opacity-90 hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-300 pb-4">
                     <span className="text-2xl">✅</span>
-                    <h3 className="text-xl font-bold text-green-400 uppercase tracking-wide">Danh sách đã thanh toán ({completedEntries.length})</h3>
+                    <h3 className="text-xl font-bold !text-[#184d47] uppercase tracking-wide">Danh sách đã thanh toán ({completedEntries.length})</h3>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr className="text-green-300 uppercase text-xs tracking-wider border-b border-white/20">
-                                <th className="p-4 font-bold">Mã Line</th>
-                                <th className="p-4 font-bold">MBL</th>
-                                <th className="p-4 font-bold text-right">Số tiền</th>
-                                <th className="p-4 font-bold text-center">UNC</th>
-                                <th className="p-4 font-bold text-right">Hành động</th>
+                            <tr className="!text-[#184d47] uppercase text-xs tracking-wider border-b border-gray-300">
+                                <th className="p-4 font-bold !text-[#184d47]">Mã Line</th>
+                                <th className="p-4 font-bold !text-[#184d47]">MBL</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-right">Số tiền</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-center">UNC</th>
+                                <th className="p-4 font-bold !text-[#184d47] text-right">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody className="text-gray-200">
+                        <tbody className="text-[#184d47]">
                             {completedEntries.map((entry) => (
-                                <tr key={entry.id} className="border-b border-white/10 last:border-0 hover:bg-white/5 transition-colors group">
-                                    <td className="p-4 font-medium text-white">{entry.maLine}</td>
-                                    <td className="p-4">{entry.mbl || '-'}</td>
-                                    <td className="p-4 text-right font-mono text-white/80">
+                                <tr key={entry.id} className="border-b border-gray-200 last:border-0 hover:bg-white/50 transition-colors group">
+                                    <td className="p-4 font-bold !text-[#184d47]">{entry.maLine}</td>
+                                    <td className="p-4 !text-[#184d47]">{entry.mbl || '-'}</td>
+                                    <td className="p-4 text-right font-mono !text-[#184d47] font-bold text-lg">
                                         {typeof entry.soTien === 'number' ? entry.soTien.toLocaleString('en-US') : entry.soTien}
                                     </td>
                                     <td className="p-4 text-center">
@@ -742,7 +742,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             href={entry.hoaDonUrl} 
                                             target="_blank" 
                                             rel="noopener noreferrer" 
-                                            className="px-3 py-1 rounded-full bg-green-500/20 text-green-300 hover:bg-green-500 hover:text-white transition-all text-xs border border-green-500/30"
+                                            className="px-3 py-1 rounded-full bg-green-100 text-green-700 hover:bg-green-600 hover:text-white transition-all text-xs border border-green-200"
                                             title={entry.hoaDonFilename}
                                         >
                                             Xem UNC
@@ -753,7 +753,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             {(isAdmin || isDocument) && (
                                                 <button
                                                     onClick={() => handleDownloadUnc(entry)}
-                                                    className="p-2 hover:bg-white/10 rounded-lg text-gray-300 hover:text-white transition-colors"
+                                                    className="p-2 hover:bg-gray-200 rounded-lg text-gray-600 hover:text-gray-800 transition-colors"
                                                     title="Tải UNC về máy"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -764,7 +764,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                             {isAdmin && (
                                                 <button
                                                     onClick={() => handleDeleteCompleted(entry)}
-                                                    className="p-2 hover:bg-red-500/20 rounded-lg text-red-400 hover:text-red-300 transition-colors"
+                                                    className="p-2 hover:bg-red-100 rounded-lg text-red-500 hover:text-red-700 transition-colors"
                                                     title="Xóa vĩnh viễn"
                                                     disabled={isLoadingData}
                                                 >
