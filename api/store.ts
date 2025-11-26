@@ -13,22 +13,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Prevent Caching
+  // Prevent Caching on the API response itself
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
   try {
     const action = req.query.action as string;
+    let body = req.body;
 
-    // --- HANDLE LIST ACTION (GET) ---
-    if (req.method === 'GET' && action === 'list') {
+    // --- HANDLE LIST ACTION (GET & POST) ---
+    // Combined logic for listing files
+    if ((req.method === 'GET' && action === 'list') || (req.method === 'POST' && body && body.action === 'list')) {
         const { blobs } = await list({ limit: 1000 });
         return res.status(200).json({ files: blobs });
     }
 
     // --- STANDARD STORE LOGIC ---
-    let body = req.body;
     if (typeof body === 'string') {
         try {
         body = JSON.parse(body);
@@ -48,18 +49,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         let url = directUrl;
         
-        if (!url) {
-            // Updated Logic: Find the latest file for this key
-            // We use prefix matching because addRandomSuffix changes the filename
-            const prefix = `db/${key}`;
-            const { blobs } = await list({ prefix, limit: 100 });
-            
-            // Sort by uploadedAt descending (newest first)
-            const sortedBlobs = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
-            
-            if (sortedBlobs.length > 0) {
-                url = sortedBlobs[0].url;
-            }
+        // Strategy: Always find the latest file from the server list to ensure cross-device consistency
+        // even if the client provided a URL (the client URL might be stale).
+        // Since we are moving to fixed filenames, looking up by prefix is safer.
+        const prefix = `db/${key}`;
+        const { blobs } = await list({ prefix, limit: 100 });
+        
+        // Sort by uploadedAt descending (newest first) to get the most recent overwrite
+        const sortedBlobs = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+        
+        if (sortedBlobs.length > 0) {
+            url = sortedBlobs[0].url;
         }
 
         if (!url) {
@@ -83,13 +83,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // --- POST DATA ---
     if (req.method === 'POST') {
-        // --- NEW: HANDLE LIST ACTION (POST) ---
-        // Robust fallback for environments where GET query params fail routing
-        if (body && body.action === 'list') {
-             const { blobs } = await list({ limit: 1000 });
-             return res.status(200).json({ files: blobs });
-        }
-
         if (!key) {
             return res.status(400).json({ error: 'Missing "key" parameter.' });
         }
@@ -107,12 +100,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const blob = await put(filePath, JSON.stringify(data), { 
             access: 'public', 
-            // Enable random suffix to ensure a new URL is generated every time.
-            // This forces clients/CDNs to fetch the new version.
-            addRandomSuffix: true,
+            // IMPORTANT: Set addRandomSuffix to FALSE to ensure we overwrite the same file.
+            // This acts as a "Single Source of Truth" so all devices look at the same filename.
+            addRandomSuffix: false, 
             contentType: 'application/json',
             // @ts-ignore: Vercel Blob requires this flag
-            allowOverwrite: true
+            allowOverwrite: true,
+            // CRITICAL: Tell Vercel Edge Cache to NOT cache this file. 
+            // This ensures Machine B gets the update immediately.
+            cacheControlMaxAge: 0, 
         });
         
         return res.status(200).json({ success: true, url: blob.url });
