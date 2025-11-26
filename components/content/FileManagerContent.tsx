@@ -225,10 +225,10 @@ const FileManagerContent: React.FC<FileManagerContentProps> = ({ back }) => {
                         <table className="w-full text-sm text-left border-collapse">
                             <thead className="bg-white/20 uppercase">
                                 <tr className="!text-[#184d47] border-b border-gray-300">
-                                    <th className="p-4 font-bold">Tên File</th>
-                                    <th className="p-4 font-bold">Kích thước</th>
-                                    <th className="p-4 font-bold">Ngày tải lên</th>
-                                    <th className="p-4 font-bold text-right">Hành động</th>
+                                    <th className="p-4 font-bold !text-[#184d47]">Tên File</th>
+                                    <th className="p-4 font-bold !text-[#184d47]">Kích thước</th>
+                                    <th className="p-4 font-bold !text-[#184d47]">Ngày tải lên</th>
+                                    <th className="p-4 font-bold !text-[#184d47] text-right">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[#184d47]">
@@ -237,15 +237,15 @@ const FileManagerContent: React.FC<FileManagerContentProps> = ({ back }) => {
                                         <td className="p-4">
                                             <div className="flex flex-col">
                                                 <div className="flex items-center gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#184d47]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                    <span className="font-bold text-[#184d47] break-all cursor-default">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 !text-[#184d47]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                    <span className="font-bold !text-[#184d47] break-all cursor-default">
                                                         {file.pathname.replace(`${currentFolder}/`, '')}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 whitespace-nowrap font-mono text-gray-600 font-semibold">{formatSize(file.size)}</td>
-                                        <td className="p-4 whitespace-nowrap text-gray-600 font-semibold">{new Date(file.uploadedAt).toLocaleDateString('vi-VN')}</td>
+                                        <td className="p-4 whitespace-nowrap font-mono !text-gray-600 font-semibold">{formatSize(file.size)}</td>
+                                        <td className="p-4 whitespace-nowrap !text-gray-600 font-semibold">{new Date(file.uploadedAt).toLocaleDateString('vi-VN')}</td>
                                         <td className="p-4 text-right whitespace-nowrap">
                                             <div className="flex justify-end items-center gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                                                 <button 

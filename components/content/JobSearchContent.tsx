@@ -109,17 +109,18 @@ const JobSearchContent: React.FC<JobSearchContentProps> = ({ back }) => {
   const ResultRow = ({ icon, label, value, highlight = false, isStatus = false }: { icon: React.ReactNode, label: string, value: any, highlight?: boolean, isStatus?: boolean }) => {
       const hasValue = value && value !== '-' && value !== 0;
       
-      let valueColor = 'text-[#184d47] font-semibold'; // Default dark teal
-      if (highlight) valueColor = 'text-[#184d47] font-extrabold text-xl'; 
-      if (isStatus && hasValue) valueColor = 'text-[#184d47] font-bold';
+      // Use !text-[...] to override global styles
+      let valueColor = '!text-[#184d47] font-semibold'; // Default dark teal
+      if (highlight) valueColor = '!text-[#184d47] font-extrabold text-xl'; 
+      if (isStatus && hasValue) valueColor = '!text-[#184d47] font-bold';
 
       return (
         <div className="flex items-center justify-between p-4 border-b border-gray-300 last:border-0 hover:bg-white/50 transition-colors group">
             <div className="flex items-center gap-4">
-                <span className="text-[#184d47] opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+                <span className="!text-[#184d47] opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
                     {icon}
                 </span>
-                <span className="text-gray-600 font-medium">{label}</span>
+                <span className="!text-gray-600 font-medium">{label}</span>
             </div>
             <div className={`text-right ${valueColor}`}>
                 {typeof value === 'number' ? value.toLocaleString('en-US') : (value || "-")}
@@ -180,8 +181,8 @@ const JobSearchContent: React.FC<JobSearchContentProps> = ({ back }) => {
         {result && (
           <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-2xl overflow-hidden animate-fade-in">
             <div className="bg-white/50 p-4 border-b border-gray-300 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-[#184d47] uppercase tracking-wide">Kết quả chi tiết</h3>
-                <span className="text-sm text-gray-600 font-semibold">{result.Thang || 'N/A'}</span>
+                <h3 className="text-lg font-bold !text-[#184d47] uppercase tracking-wide">Kết quả chi tiết</h3>
+                <span className="text-sm !text-gray-600 font-semibold">{result.Thang || 'N/A'}</span>
             </div>
             
             <div className="p-2">
