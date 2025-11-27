@@ -105,6 +105,11 @@ const JobSearchContent: React.FC<JobSearchContentProps> = ({ back }) => {
     }
   };
 
+  const getInputStyle = (val: string) => {
+      const isFilled = val !== '';
+      return `w-full p-4 pl-5 border rounded-3xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] focus:border-transparent transition-all duration-300 text-lg ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
+  };
+
   // Helper component for result rows
   const ResultRow = ({ icon, label, value, highlight = false, isStatus = false }: { icon: React.ReactNode, label: string, value: any, highlight?: boolean, isStatus?: boolean }) => {
       const hasValue = value && value !== '-' && value !== 0;
@@ -130,82 +135,68 @@ const JobSearchContent: React.FC<JobSearchContentProps> = ({ back }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Search Bar */}
-      <div className="relative mb-8 group">
-         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400 group-focus-within:text-green-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4-4a1 1 0 01-1.414-4.816A6 6 0 012 8z" clipRule="evenodd" />
-            </svg>
-         </div>
-         <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Nhập mã HBL hoặc Job (VD: KMLSHA...)"
-            className="w-full pl-12 pr-28 py-4 bg-white/10 border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400 transition-all shadow-lg backdrop-blur-sm"
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-         />
-         <button
-            onClick={handleSearch}
-            disabled={isLoading}
-            className="absolute right-2 top-2 bottom-2 px-6 bg-[#184d47] text-white rounded-full font-bold hover:bg-[#20635b] transition-all disabled:bg-gray-500 disabled:cursor-not-allowed shadow-md"
-         >
-            {isLoading ? <span className="animate-spin inline-block">⏳</span> : 'Tra cứu'}
-         </button>
-      </div>
-
-      {/* Helper Text */}
-      {!result && !isLoading && !error && (
-        <div className="text-center text-gray-400 italic mt-10">
-            <p className="mb-2">💡 Số HBL KIMBERRY có dạng KML....</p>
-            <p>Vui lòng nhập chính xác để có kết quả tốt nhất.</p>
+    <div className="space-y-8">
+        {/* Search Bar */}
+        <div className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-lg transition-all hover:bg-white/10">
+             <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">🔍</span>
+                <h3 className="text-xl font-bold text-green-300">Tra cứu Job</h3>
+             </div>
+             <div className="relative">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Nhập mã Job hoặc số HBL..."
+                    className={getInputStyle(query)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <button 
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className="absolute right-2 top-2 bottom-2 px-6 bg-[#184d47] text-white rounded-2xl hover:bg-green-700 transition-colors font-bold shadow-lg disabled:opacity-50"
+                >
+                    {isLoading ? '⏳' : 'Tìm kiếm'}
+                </button>
+             </div>
+             {error && (
+                <div className="mt-4 p-3 bg-red-500/20 text-red-200 rounded-xl border border-red-500/30 flex items-center gap-2">
+                    <span>{error}</span>
+                </div>
+             )}
         </div>
-      )}
 
-      {/* Result Area */}
-      <div className="space-y-4">
-        {isLoading && (
-            <div className="text-center py-10">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                <p className="text-green-200">Đang tìm kiếm dữ liệu...</p>
+        {/* Results */}
+        {result && (
+            <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/30 shadow-xl animate-fade-in text-[#184d47]">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-300/50">
+                    <span className="text-2xl">📦</span>
+                    <h3 className="text-xl font-bold !text-[#184d47]">Kết quả chi tiết</h3>
+                </div>
+                
+                <div className="flex flex-col">
+                     <ResultRow icon={Icons.Job} label="Mã Job" value={result.Ma} />
+                     <ResultRow icon={Icons.LocalCharge} label="Local Charge" value={result.MaKH} highlight />
+                     <ResultRow icon={Icons.Deposit} label="Tiền Cược" value={result.SoTien} highlight />
+                     
+                     <div className="h-px bg-gray-300 w-full my-2"></div>
+
+                     <ResultRow icon={Icons.Status} label="Trạng thái LCC" value={result.TrangThai} isStatus />
+                     <ResultRow icon={Icons.CalendarIn} label="Ngày nhận cược" value={result.NoiDung1} />
+                     <ResultRow icon={Icons.CalendarOut} label="Ngày hoàn cược" value={result.NoiDung2} />
+                </div>
             </div>
         )}
         
-        {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-100 p-4 rounded-xl text-center backdrop-blur-md">
-                {error}
-            </div>
-        )}
-
-        {result && (
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-2xl overflow-hidden animate-fade-in">
-            <div className="bg-white/50 p-4 border-b border-gray-300 flex justify-between items-center">
-                <h3 className="text-lg font-bold !text-[#184d47] uppercase tracking-wide">Kết quả chi tiết</h3>
-                <span className="text-sm !text-gray-600 font-semibold">{result.Thang || 'N/A'}</span>
-            </div>
-            
-            <div className="p-2">
-                <ResultRow icon={Icons.Job} label="Mã Job/HBL" value={result.Ma} highlight />
-                <ResultRow icon={Icons.LocalCharge} label="Local Charge" value={result.MaKH} highlight />
-                <ResultRow icon={Icons.Deposit} label="Tiền Cược" value={result.SoTien} highlight />
-                <ResultRow icon={Icons.Status} label="Trạng thái LCC" value={result.TrangThai} isStatus />
-                <ResultRow icon={Icons.CalendarIn} label="Nhận Cược" value={result.NoiDung1} isStatus />
-                <ResultRow icon={Icons.CalendarOut} label="Hoàn Cược" value={result.NoiDung2} isStatus />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fade-in 0.4s ease-out forwards;
-        }
-      `}</style>
+        <style>{`
+            @keyframes fade-in {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fade-in 0.4s ease-out forwards;
+            }
+        `}</style>
     </div>
   );
 };

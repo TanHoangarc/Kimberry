@@ -438,6 +438,13 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
         warning: 'text-yellow-300 bg-yellow-500/20 border-yellow-500/50',
     };
 
+    // Updated color logic to use #E8F0FE (Light Blue) and BLACK text for active state
+    // Add !important modifier to background color classes
+    const getInputStyle = (val: any) => {
+        const isFilled = val !== '' && val !== null && val !== undefined;
+        return `w-full p-3 border rounded-xl placeholder-gray-500 focus:ring-2 focus:ring-[#184d47] outline-none transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
+    };
+
     return (
         <div className="space-y-8">
             {isCalendarOpen && (
@@ -458,7 +465,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                         value={processingText}
                         onChange={(e) => setProcessingText(e.target.value)}
                         placeholder="Dán dữ liệu vào đây (VD: 54,000,000 ... KMLSHA...)"
-                        className="w-full p-4 border border-white/20 rounded-xl bg-white/10 text-white placeholder-gray-400 focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none min-h-[100px] transition-colors"
+                        className={`w-full p-4 border rounded-xl placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] outline-none min-h-[100px] transition-colors ${processingText.trim().length > 0 ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-inner' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
                     />
                     <div className="absolute bottom-3 right-3">
                         <button 
@@ -502,14 +509,14 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                                 name={field.name}
                                                 value={String(formData[field.name] || '')}
                                                 onChange={handleChange}
-                                                className="w-full p-3 pl-4 border border-white/20 rounded-xl bg-white/10 text-white focus:ring-2 focus:ring-green-400 outline-none appearance-none cursor-pointer"
+                                                className={`${getInputStyle(formData[field.name])} pl-4 appearance-none cursor-pointer`}
                                                 style={{ colorScheme: 'dark' }}
                                             >
                                                 {field.options?.map(option => (
-                                                    <option key={option} value={option} className="bg-gray-800">{option || '--- Chọn tháng ---'}</option>
+                                                    <option key={option} value={option} className="bg-gray-800 text-white">{option || '--- Chọn tháng ---'}</option>
                                                 ))}
                                             </select>
-                                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-white">
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </div>
                                         </div>
@@ -523,7 +530,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                             inputMode={field.inputMode}
                                             required={field.required}
                                             placeholder="..."
-                                            className="w-full p-3 border border-white/20 rounded-xl bg-white/10 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-400 outline-none transition-colors"
+                                            className={getInputStyle(formData[field.name])}
                                         />
                                     )}
                                     
@@ -597,16 +604,16 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
             )}
 
             {/* BLOCK 3: TEMP TABLE */}
-            <div className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl overflow-hidden transition-all hover:bg-white/10">
+            <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-white/30 shadow-xl overflow-hidden transition-all text-[#184d47]">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
                          <span className="text-2xl">☁️</span>
-                         <h3 className="text-xl font-bold text-blue-300">Bảng tạm Cloud ({jobEntries.length} mục)</h3>
+                         <h3 className="text-xl font-bold !text-[#184d47]">Bảng tạm Cloud ({jobEntries.length} mục)</h3>
                     </div>
                     <button 
                         onClick={handleRefresh} 
                         disabled={isSaving}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium text-white transition-colors border border-white/20 flex items-center gap-2"
+                        className="px-4 py-2 bg-[#184d47] hover:bg-[#123b36] rounded-full text-sm font-medium text-white transition-colors border border-transparent flex items-center gap-2"
                     >
                         <span className={isSaving ? 'animate-spin' : ''}>🔄</span>
                         Làm mới
@@ -615,17 +622,17 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                 
                 <div className="overflow-x-auto rounded-xl border border-white/10">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-white/10 text-green-300 uppercase text-xs tracking-wider">
+                        <thead className="bg-white/10 uppercase text-xs tracking-wider border-b border-gray-300">
                             <tr>
-                                {formFields.map(f => <th key={f.name} className="p-4 font-bold border-b border-white/10">{f.label.replace(' (*)', '')}</th>)}
-                                <th className="p-4 font-bold text-right border-b border-white/10">Hành động</th>
+                                {formFields.map(f => <th key={f.name} className="p-4 font-bold !text-[#184d47]">{f.label.replace(' (*)', '')}</th>)}
+                                <th className="p-4 font-bold !text-[#184d47] text-right">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody className="text-gray-200">
+                        <tbody className="!text-[#184d47]">
                             {jobEntries.map((job, index) => (
-                                <tr key={job.Ma || index} className="border-b border-white/5 hover:bg-white/10 transition-colors last:border-0">
+                                <tr key={job.Ma || index} className="border-b border-gray-200 hover:bg-white/50 transition-colors last:border-0">
                                     {formFields.map(f => (
-                                        <td key={f.name} className="p-4 whitespace-nowrap font-medium">
+                                        <td key={f.name} className="p-4 whitespace-nowrap font-medium !text-[#184d47]">
                                             {typeof job[f.name] === 'number' ? (job[f.name] as number).toLocaleString('en-US') : (job[f.name] || '-')}
                                         </td>
                                     ))}
@@ -633,7 +640,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                         <div className="flex justify-end items-center gap-2">
                                             <button 
                                                 onClick={() => handleLoadJobForEditing(job.Ma)} 
-                                                className="p-2 text-blue-400 hover:text-white hover:bg-blue-500 rounded-lg transition-colors"
+                                                className="p-2 text-blue-600 hover:text-white hover:bg-blue-500 rounded-lg transition-colors"
                                                 title="Sửa lại mục này"
                                                 disabled={isSaving}
                                             >
@@ -641,7 +648,7 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                                             </button>
                                             <button 
                                                 onClick={() => handleDeleteJob(job.Ma)} 
-                                                className="p-2 text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors"
+                                                className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-colors"
                                                 title="Xóa mục này"
                                                 disabled={isSaving}
                                             >
@@ -655,12 +662,12 @@ const DataEntryContent: React.FC<DataEntryContentProps> = ({ back }) => {
                     </table>
                 </div>
                 {jobEntries.length === 0 && (
-                    <div className="text-center py-10 text-gray-500 bg-white/5 border border-dashed border-white/10 rounded-xl mt-4">
+                    <div className="text-center py-10 text-gray-500 bg-white/40 border border-dashed border-gray-300 rounded-xl mt-4">
                         <p>Bảng tạm hiện đang trống.</p>
                     </div>
                 )}
                 
-                <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-white/10 justify-end">
+                <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-300 justify-end">
                     <button
                         onClick={handleSync}
                         disabled={isJobLoading || isChecking || isSaving || jobEntries.length === 0}

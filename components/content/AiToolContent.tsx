@@ -10,6 +10,11 @@ interface AiToolContentProps {
 
 type ToolType = 'split' | 'unlock';
 
+const getInputStyle = (val: string | number) => {
+    const isFilled = val !== '' && val !== null && val !== undefined;
+    return `w-full p-3 border rounded-xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
+};
+
 const AiToolContent: React.FC<AiToolContentProps> = ({ back }) => {
   const [activeTool, setActiveTool] = useState<ToolType>('split');
 
@@ -292,12 +297,13 @@ const SplitPdfTool: React.FC = () => {
                         type="file" 
                         accept="application/pdf"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-gray-400
-                          file:mr-4 file:py-3 file:px-6
+                        className="block w-max text-sm text-gray-300
+                          file:mr-4 file:py-2 file:px-4
                           file:rounded-full file:border-0
-                          file:text-sm file:font-bold
-                          file:bg-green-600 file:text-white
-                          hover:file:bg-green-500 cursor-pointer"
+                          file:text-sm file:font-semibold
+                          file:bg-[#a8d0a2] file:text-gray-800
+                          hover:file:bg-[#5c9ead] hover:file:text-white
+                          bg-white/5 rounded-full border border-white/10 pr-4 cursor-pointer"
                     />
                 </div>
 
@@ -310,7 +316,7 @@ const SplitPdfTool: React.FC = () => {
                                 value={pageRange}
                                 onChange={(e) => setPageRange(e.target.value)}
                                 placeholder="Nhập số trang..."
-                                className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-green-400 outline-none"
+                                className={getInputStyle(pageRange)}
                             />
                         </div>
 
@@ -321,7 +327,7 @@ const SplitPdfTool: React.FC = () => {
                                 value={outputName}
                                 onChange={(e) => setOutputName(e.target.value)}
                                 placeholder="Nhập tên file..."
-                                className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-green-400 outline-none"
+                                className={getInputStyle(outputName)}
                             />
                         </div>
 
@@ -353,7 +359,7 @@ const SplitPdfTool: React.FC = () => {
                                         type="text" 
                                         value={page.customName}
                                         onChange={(e) => handleNameChange(idx, e.target.value)}
-                                        className="p-2 border border-white/10 bg-white/5 rounded-lg text-sm text-white focus:ring-2 focus:ring-green-400 outline-none w-full"
+                                        className={getInputStyle(page.customName)}
                                     />
                                     <div className="text-center">
                                          <button 
@@ -416,7 +422,6 @@ const SplitPdfTool: React.FC = () => {
 // --- SUB-COMPONENT: UNLOCK PDF TOOL ---
 const UnlockPdfTool: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -442,18 +447,9 @@ const UnlockPdfTool: React.FC = () => {
         try {
             const arrayBuffer = await file.arrayBuffer();
             
-            let pdfDoc;
-            try {
-                // First try without password (for owner-locked files that open for reading)
-                pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-            } catch (e) {
-                // If failed, try with password
-                try {
-                     pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { password: password });
-                } catch (e2) {
-                     throw new Error('Mật khẩu không đúng hoặc file bị mã hóa quá mạnh.');
-                }
-            }
+            // Try to load with ignoreEncryption: true.
+            // This works for Owner Passwords (permissions) where content is not encrypted against reading.
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
 
             // Saving automatically removes encryption unless specifically re-encrypted
             const pdfBytes = await pdfDoc.save();
@@ -472,7 +468,7 @@ const UnlockPdfTool: React.FC = () => {
         } catch (error) {
             console.error(error);
             const e = error as Error;
-            setStatus({ type: 'error', message: `Lỗi: ${e.message}` });
+            setStatus({ type: 'error', message: `Lỗi: ${e.message}. Có thể file cần mật khẩu để mở (User Password).` });
         } finally {
             setIsProcessing(false);
         }
@@ -480,13 +476,6 @@ const UnlockPdfTool: React.FC = () => {
 
     return (
         <div className="max-w-3xl mx-auto space-y-8">
-             <div className="bg-yellow-500/10 p-6 rounded-2xl border border-yellow-500/20 text-yellow-200">
-                <p className="flex items-center gap-3">
-                    <span className="text-2xl">🔐</span>
-                    <span>Công cụ gỡ bỏ mật khẩu và quyền hạn chế (in ấn, copy) của file PDF.</span>
-                </p>
-            </div>
-
             <div className="space-y-6">
                 <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
                     <label className="block text-base font-bold text-green-300 mb-3">1. Chọn file PDF bị khóa</label>
@@ -494,25 +483,14 @@ const UnlockPdfTool: React.FC = () => {
                         type="file" 
                         accept="application/pdf"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-gray-400
-                          file:mr-4 file:py-3 file:px-6
+                        className="block w-max text-sm text-gray-300
+                          file:mr-4 file:py-2 file:px-4
                           file:rounded-full file:border-0
-                          file:text-sm file:font-bold
-                          file:bg-indigo-600 file:text-white
-                          hover:file:bg-indigo-500 cursor-pointer"
+                          file:text-sm file:font-semibold
+                          file:bg-[#a8d0a2] file:text-gray-800
+                          hover:file:bg-[#5c9ead] hover:file:text-white
+                          bg-white/5 rounded-full border border-white/10 pr-4 cursor-pointer"
                     />
-                </div>
-
-                <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
-                    <label className="block text-base font-bold text-green-300 mb-3">2. Mật khẩu (Nếu file yêu cầu mật khẩu để mở)</label>
-                    <input 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Nhập mật khẩu (để trống nếu không có)"
-                        className="w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-green-400 outline-none placeholder-gray-500"
-                    />
-                    <p className="text-sm text-gray-400 mt-2 italic">💡 Nếu bạn có thể mở file để xem nhưng không in/copy được, hãy để trống ô mật khẩu.</p>
                 </div>
 
                 {status && (

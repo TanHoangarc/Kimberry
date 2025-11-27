@@ -225,7 +225,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
         }
 
         setIsUploading(true);
-        setStatus({ type: 'info', message: 'Đang tải hóa đơn...' });
+        setStatus(null); // Clear any previous status
 
         // Sanitize MBL to be filename-safe
         const safeMbl = formData.mbl 
@@ -253,8 +253,6 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 throw new Error(result.error || result.details || 'Lỗi server upload file');
             }
             const result = await response.json();
-
-            setStatus({ type: 'info', message: 'Đã tải hóa đơn. Đang lưu dữ liệu...' });
 
             // 2. Save Data
             const newEntry: MblPaymentData = {
@@ -295,7 +293,8 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
             setFormData(initialFormData);
             setSelectedFile(null);
             if(fileInputRef.current) fileInputRef.current.value = '';
-            setStatus({ type: 'success', message: `Đã thêm thanh toán cho Mã Line "${newEntry.maLine}".` });
+            
+            // Removed final success message as requested to reduce redundancy
 
         } catch (error) {
             const err = error as Error;
@@ -516,6 +515,12 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     const isAdmin = userRole === 'Admin';
     const isDocument = userRole === 'Document';
 
+    // Updated color logic to use #E8F0FE (Light Blue) and BLACK text for active state, consistent with DataEntryContent
+    const getInputStyle = (val: any) => {
+        const isFilled = val !== '' && val !== null && val !== undefined;
+        return `w-full p-3 border rounded-xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
+    };
+
     return (
         <div className="space-y-8">
              <input
@@ -551,7 +556,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                     name="maLine"
                                     value={formData.maLine}
                                     onChange={handleChange}
-                                    className="w-full p-3 pl-4 border border-white/20 rounded-xl bg-white/10 focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none text-white appearance-none cursor-pointer hover:bg-white/20 transition-colors"
+                                    className={`${getInputStyle(formData.maLine)} pl-4 appearance-none cursor-pointer`}
                                     style={{ colorScheme: 'dark' }}
                                 >
                                     <option value="" className="bg-gray-800 text-gray-400">--- Chọn Mã Line ---</option>
@@ -599,7 +604,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             value={formData.mbl}
                             onChange={handleChange}
                             placeholder="Nhập số MBL..."
-                            className="w-full p-3 border border-white/20 rounded-xl bg-white/10 focus:ring-2 focus:ring-green-400 outline-none text-white placeholder-gray-400 hover:bg-white/20 transition-colors"
+                            className={getInputStyle(formData.mbl)}
                         />
                     </div>
                     
@@ -611,7 +616,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                             onChange={handleChange}
                             placeholder="0"
                             inputMode="decimal"
-                            className="w-full p-3 border border-white/20 rounded-xl bg-white/10 focus:ring-2 focus:ring-green-400 outline-none text-white placeholder-gray-400 hover:bg-white/20 transition-colors font-mono"
+                            className={`${getInputStyle(formData.soTien)} font-mono`}
                         />
                     </div>
 

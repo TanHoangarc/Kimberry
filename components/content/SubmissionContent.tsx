@@ -251,6 +251,11 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
   
   const isAdmin = userRole === 'Admin';
 
+  const getInputStyle = (val: string) => {
+      const isFilled = val !== '';
+      return `w-full p-2 border rounded-xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] focus:border-transparent transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
+  };
+
   return (
     <div>
         <div className="flex justify-end items-center mb-4">
@@ -275,7 +280,7 @@ const SubmissionContent: React.FC<SubmissionContentProps> = ({ back }) => {
             value={jobId}
             onChange={(e) => setJobId(e.target.value)}
             placeholder="Nhập số HBL..."
-            className="w-full p-2 bg-white/10 border border-white/20 rounded-md focus:ring-2 focus:ring-[#5c9ead] focus:border-transparent outline-none text-white placeholder-gray-400"
+            className={getInputStyle(jobId)}
             required
           />
         </div>
