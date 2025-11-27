@@ -8,6 +8,7 @@ interface AdminPanelContentProps {
 
 const AdminPanelContent: React.FC<AdminPanelContentProps> = ({ back }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [showPasswords, setShowPasswords] = useState(false); // State to toggle password visibility
   const adminEmail = 'tanhoangarc@gmail.com';
 
   useEffect(() => {
@@ -52,12 +53,22 @@ const AdminPanelContent: React.FC<AdminPanelContentProps> = ({ back }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20 flex items-start gap-3">
-         <span className="text-2xl">🛡️</span>
-         <div>
-            <h4 className="font-bold text-blue-300">Quản trị viên</h4>
-            <p className="text-sm text-blue-200/80">Quản lý người dùng và phân quyền truy cập hệ thống. Các thay đổi sẽ được áp dụng ngay lập tức.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20">
+         <div className="flex items-start gap-3">
+            <span className="text-2xl">🛡️</span>
+            <div>
+                <h4 className="font-bold text-blue-300">Quản trị viên</h4>
+                <p className="text-sm text-blue-200/80">Quản lý người dùng và phân quyền truy cập hệ thống.</p>
+            </div>
          </div>
+         
+         <button 
+            onClick={() => setShowPasswords(!showPasswords)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${showPasswords ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50' : 'bg-white/10 text-gray-300 border-white/20 hover:bg-white/20'}`}
+         >
+            <span>{showPasswords ? '🙈' : '👁️'}</span>
+            {showPasswords ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+         </button>
       </div>
 
       <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-xl overflow-hidden">
@@ -66,6 +77,7 @@ const AdminPanelContent: React.FC<AdminPanelContentProps> = ({ back }) => {
             <thead>
                 <tr className="bg-white/10 text-green-300 uppercase text-xs tracking-wider border-b border-white/10">
                 <th className="p-5 font-bold">Email Người dùng</th>
+                <th className="p-5 font-bold">Mật khẩu</th>
                 <th className="p-5 font-bold">Vai trò hiện tại</th>
                 <th className="p-5 font-bold">Điều chỉnh quyền</th>
                 <th className="p-5 font-bold text-right">Hành động</th>
@@ -81,6 +93,15 @@ const AdminPanelContent: React.FC<AdminPanelContentProps> = ({ back }) => {
                             </div>
                             <span className="font-medium text-white">{user.email}</span>
                         </div>
+                    </td>
+                    <td className="p-5 align-middle">
+                        {showPasswords ? (
+                            <code className="bg-black/30 px-2 py-1 rounded text-yellow-300 font-mono text-sm border border-white/10">
+                                {user.password}
+                            </code>
+                        ) : (
+                            <span className="text-gray-500 text-lg tracking-widest">••••••••</span>
+                        )}
                     </td>
                     <td className="p-5 align-middle">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${roleBadgeStyles[user.role]}`}>
