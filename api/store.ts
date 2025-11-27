@@ -51,15 +51,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         // Strategy: Always find the latest file from the server list to ensure cross-device consistency
         // even if the client provided a URL (the client URL might be stale).
-        // Since we are moving to fixed filenames, looking up by prefix is safer.
+        
+        // We search using the prefix to catch all potential files
         const prefix = `db/${key}`;
         const { blobs } = await list({ prefix, limit: 100 });
         
-        // Sort by uploadedAt descending (newest first) to get the most recent overwrite
-        const sortedBlobs = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
-        
-        if (sortedBlobs.length > 0) {
-            url = sortedBlobs[0].url;
+        // FIX: Prioritize the exact fixed filename (e.g., 'db/my_key.json')
+        // This ignores any older files with random suffixes (e.g., 'db/my_key.json-12345')
+        const exactMatch = blobs.find(blob => blob.pathname === `db/${key}.json`);
+
+        if (exactMatch) {
+            url = exactMatch.url;
+        } else {
+            // Fallback: If exact match not found (legacy data), sort by date and pick newest
+            const sortedBlobs = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+            if (sortedBlobs.length > 0) {
+                url = sortedBlobs[0].url;
+            }
         }
 
         if (!url) {

@@ -402,6 +402,9 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                 ...originalEntry,
                 hoaDonUrl: result.url,
                 hoaDonFilename: uncFile.name,
+                // Save the original invoice before overwriting
+                originalInvoiceUrl: originalEntry.hoaDonUrl,
+                originalInvoiceFilename: originalEntry.hoaDonFilename,
             };
 
             // 2. Update DB
@@ -771,6 +774,20 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            {isAdmin && entry.originalInvoiceUrl && (
+                                                <a
+                                                    href={entry.originalInvoiceUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 hover:bg-yellow-100 rounded-lg text-yellow-600 hover:text-yellow-800 transition-colors border border-transparent hover:border-yellow-300"
+                                                    title="Xem Hóa đơn gốc"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z" />
+                                                        <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                                                    </svg>
+                                                </a>
+                                            )}
                                             {(isAdmin || isDocument) && (
                                                 <button
                                                     onClick={() => handleDownloadUnc(entry)}

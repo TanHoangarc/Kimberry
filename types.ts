@@ -35,6 +35,9 @@ export interface MblPaymentData {
   mbl: string;
   hoaDonUrl: string;
   hoaDonFilename: string;
+  // New fields to store the original invoice when moving to completed
+  originalInvoiceUrl?: string;
+  originalInvoiceFilename?: string;
 }
 
 export interface SubmissionData {
