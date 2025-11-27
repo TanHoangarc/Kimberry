@@ -105,6 +105,7 @@ const JobSearchContent: React.FC<JobSearchContentProps> = ({ back }) => {
     }
   };
 
+  // Updated color logic to use #E8F0FE (Light Blue) and BLACK text for active state
   const getInputStyle = (val: string) => {
       const isFilled = val !== '';
       return `w-full p-4 pl-5 border rounded-3xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] focus:border-transparent transition-all duration-300 text-lg ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;

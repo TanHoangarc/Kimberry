@@ -102,20 +102,10 @@ const App: React.FC = () => {
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop')",
-            filter: "brightness(0.7)"
+            backgroundImage: "url('https://3jtqcr0thkwcmrlm.public.blob.vercel-storage.com/image-150.jpg')",
+            filter: "brightness(0.85)"
         }}
       ></div>
-
-      {/* Big Typography Background */}
-      <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <h1 
-          className="text-[15vw] font-black tracking-widest uppercase whitespace-nowrap bg-gradient-to-t from-white/0 to-white/80 text-transparent bg-clip-text" 
-          style={{ mixBlendMode: 'overlay' }}
-        >
-          KIMBERRY
-        </h1>
-      </div>
 
       {/* Top Navigation Bar (Header + Navbar combined visually) */}
       <div className="relative z-50 flex flex-col md:flex-row items-center justify-between px-8 py-6 max-w-[1600px] mx-auto">

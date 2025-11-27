@@ -10,6 +10,7 @@ interface AiToolContentProps {
 
 type ToolType = 'split' | 'unlock';
 
+// Updated color logic to use #E8F0FE (Light Blue) and BLACK text for active state
 const getInputStyle = (val: string | number) => {
     const isFilled = val !== '' && val !== null && val !== undefined;
     return `w-full p-3 border rounded-xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;

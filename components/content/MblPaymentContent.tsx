@@ -507,15 +507,16 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
     };
 
     const statusColor = {
-        success: 'text-green-600 bg-green-100 border-green-300',
-        error: 'text-red-600 bg-red-100 border-red-300',
-        info: 'text-blue-600 bg-blue-100 border-blue-300',
+        success: 'text-green-300 bg-green-500/20 border-green-500/50',
+        error: 'text-red-300 bg-red-500/20 border-red-500/50',
+        info: 'text-blue-300 bg-blue-500/20 border-blue-500/50',
     };
     
     const isAdmin = userRole === 'Admin';
     const isDocument = userRole === 'Document';
 
     // Updated color logic to use #E8F0FE (Light Blue) and BLACK text for active state, consistent with DataEntryContent
+    // Added !important to force override
     const getInputStyle = (val: any) => {
         const isFilled = val !== '' && val !== null && val !== undefined;
         return `w-full p-3 border rounded-xl outline-none placeholder-gray-400 focus:ring-2 focus:ring-[#184d47] transition-all duration-300 ${isFilled ? '!bg-[#E8F0FE] !text-black border-[#184d47]/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`;
@@ -574,7 +575,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                     title="Thêm Mã Line mới"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                                     </svg>
                                 </button>
                             ) : (
@@ -584,7 +585,7 @@ const MblPaymentContent: React.FC<MblPaymentContentProps> = ({ back }) => {
                                         value={newMaLine}
                                         onChange={(e) => setNewMaLine(e.target.value)}
                                         placeholder="Mã Line mới..."
-                                        className="p-3 border border-white/20 rounded-xl bg-white/10 text-white focus:ring-2 focus:ring-green-400 outline-none placeholder-gray-400"
+                                        className={getInputStyle(newMaLine)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleAddMaLine()}
                                         autoFocus
                                     />

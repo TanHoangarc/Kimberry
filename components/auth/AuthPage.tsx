@@ -34,25 +34,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
             <div 
                 className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-100 ease-out will-change-transform"
                 style={{ 
-                    backgroundImage: "url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop')",
-                    filter: "brightness(0.6)",
+                    backgroundImage: "url('https://3jtqcr0thkwcmrlm.public.blob.vercel-storage.com/image-150.jpg')",
+                    filter: "brightness(0.85)",
                     transform: `scale(1.1) translate(${-mousePos.x}px, ${-mousePos.y}px)` // Scale 1.1 ensures edges don't show when moving
                 }}
             ></div>
-
-            {/* Big Typography Background */}
-            <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-                <h1 
-                    className="text-[15vw] font-black tracking-widest uppercase whitespace-nowrap bg-gradient-to-t from-white/0 via-white/40 to-white/80 text-transparent bg-clip-text" 
-                    style={{ 
-                        mixBlendMode: 'overlay',
-                        // Sync exactly with background (Same scale and translation direction)
-                        transform: `scale(1.1) translate(${-mousePos.x}px, ${-mousePos.y}px)`
-                    }}
-                >
-                KIMBERRY
-                </h1>
-            </div>
 
             {/* Auth Card Container */}
             <div className="relative z-10 w-full max-w-md px-4">
